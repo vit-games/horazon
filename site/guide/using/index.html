@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Using it · Horazon guide</title>
+  <meta name="description" content="The pages of Horazon: Session, Runs, Drops, Grail and Trade." />
+  <link rel="icon" href="../../assets/favicon.svg" />
+  <link rel="stylesheet" href="../../style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="../../" aria-label="Horazon">H<img src="../../assets/portal.svg" alt="" width="26" height="34" />RAZON</a>
+    <nav aria-label="Site">
+      <a href="../install/" aria-current="true">Guide</a>
+      <a href="../faq/">FAQ</a>
+      <a href="https://github.com/vit-games/horazon">GitHub</a>
+      <a class="btn small" href="../../#download">Download</a>
+    </nav>
+  </header>
+
+  <div class="guide">
+    <nav class="rail" aria-label="Guide">
+      <a href="../install/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 1.5v11M4 4l5.5-2.5M4 8l5.5-2.5M10 9.5l-2 3" /></svg>Install</a>
+      <a href="../setup/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3 3.5l8 7M11 3.5l-8 7" /></svg>First-time setup</a>
+      <a href="../using/" aria-current="page"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3.5 4.5 7 7.5l3.5-3M3.5 9.5 7 12.5l3.5-3" /></svg>Using it</a>
+      <a href="../overlays/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7a5 5 0 0 1 10 0M4.5 7a2.5 2.5 0 0 1 5 0M7 7v5.5" /></svg>Overlays</a>
+      <a href="../updates/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2v5a3.5 3.5 0 0 0 7 0V2M7 10.5v2M4.5 12.5h5" /></svg>Updates and your data</a>
+      <a href="../faq/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 1.5l9 11M11.5 1.5l-9 11M7 1.5v11" /></svg>FAQ</a>
+    </nav>
+    <article id="main">
+      <h1>Using it</h1>
+      <p class="lead">The rail on the left is the whole app: six pages you read, and two you set up. Keys <kbd>1</kbd> to <kbd>8</kbd> switch between them, and the season picker at the top right looks back at earlier seasons.</p>
+
+      <h2 id="session">Session</h2>
+      <p>The app opens here. While a map is open you see its name and tier, the clock, kills, the share of the map cleared and how you stand against your best clear. Between maps it shows the last run and the session so far: the best find, the other drops, the runs and your fastest clears. Under the session's totals, your level: how far into it you are, what the session added, what deaths cost (after picking up your corpse) and, while you play, when you reach the next level at this pace. It hides once a character reaches 99.</p>
+
+      <h2 id="runs">Runs</h2>
+      <p>Every map run with its tier, time, kills, kills per minute, map events and notable drops. <b>By map</b> compares your maps (how often you ran each, best and typical clear, a trend line); <b>Log</b> lists the runs one by one, with filters. <b>Zones</b> and <b>Bossing</b> cover what isn't a map.</p>
+      <p>The buttons at the top right switch between your characters, or show <b>All</b> of them together and compare them.</p>
+      <figure class="shot clip">
+        <video src="../../media/runs.webm" poster="../../media/runs.webp" width="1280" height="800" muted loop playsinline preload="none" aria-label="The Runs page: hovering a find shows its tooltip, the log is filtered to tier 2 maps and scrolled, then By map compares the maps and one map opens to its runs."></video>
+        <button class="clip-toggle" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="i-pause" d="M5 3.5v9M11 3.5v9" /><path class="i-play" d="M5 3.2v9.6L12.6 8z" /></svg></button>
+        <figcaption>Runs: the log filtered to tier 2, then By map. Sample data built from one player's real runs.</figcaption>
+      </figure>
+
+      <h2 id="drops">Drops</h2>
+      <p>The season's haul on top: ten cards for your best drops, ranked by your item tiers. Pin any drop of the season to a card. Below it, one day at a time: pick the day on a calendar shaded by drops, or step with <kbd>←</kbd> and <kbd>→</kbd>. Hover an item for its in-game tooltip.</p>
+      <p><b>Currency</b> counts runes, keys, essences and the like per day. <b>Tiers</b> is where the ranking comes from: drag items between tiers, rename and recolour them, and export or import the list as a file. Cube slams and bricks are counted, and crafted items are recorded as crafts.</p>
+      <figure class="shot clip">
+        <video src="../../media/drops.webm" poster="../../media/drops.webp" width="1280" height="800" muted loop playsinline preload="none" aria-label="The Drops page: hovering the haul cards shows tooltips, then a September day is picked on the calendar and its drops are listed, one day stepped back."></video>
+        <button class="clip-toggle" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="i-pause" d="M5 3.5v9M11 3.5v9" /><path class="i-play" d="M5 3.2v9.6L12.6 8z" /></svg></button>
+        <figcaption>Drops: the season haul, then one day picked on the calendar. Sample data built from one player's real runs.</figcaption>
+      </figure>
+
+      <h2 id="grail">Grail</h2>
+      <p>Every unique and set in the game, found or missing, all time or by season. First finds are marked as they drop, and milestones are kept.</p>
+      <figure class="shot clip">
+        <video src="../../media/grail.webm" poster="../../media/grail.webp" width="1280" height="800" muted loop playsinline preload="none" aria-label="The Grail page: tooltips on found items, the Rings group, the Sets tab, and a search for Tal Rasha's set."></video>
+        <button class="clip-toggle" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="i-pause" d="M5 3.5v9M11 3.5v9" /><path class="i-play" d="M5 3.2v9.6L12.6 8z" /></svg></button>
+        <figcaption>Grail: groups, sets and search.</figcaption>
+      </figure>
+
+      <h2 id="history">Session history</h2>
+      <p>Under the session, its history for the season picked at the top (or all time): your totals, then every session as a row with its day and hours, how long it lasted, its maps, zones and boss fights, kills, best find and who played. Open one to see it the way the session looked when it ended. Below the list, <b>When you play</b>: a calendar of kills, maps, drops or Worldstone Shards per day, hour by hour for short ranges; click a day for its sessions. A session is a run of games with no break longer than 45 minutes, across characters.</p>
+
+      <h2 id="trade">Trade</h2>
+      <p>New valuable drops wait here to be listed or stashed. Listings you post on the PD2 trade site sync back; mark them sold with the price you really got, in HR. Magic, rare and crafted finds show while they sit in your stash.</p>
+      <p>Horazon shows no market prices or estimates: only the prices you enter yourself.</p>
+
+      <h2 id="keys">Keys</h2>
+      <ul>
+        <li><kbd>1</kbd> to <kbd>7</kbd>: Session, Runs, Drops, Grail, Trade, Stream, Setup.</li>
+        <li><kbd>/</kbd>: jump to the page's search.</li>
+        <li><kbd>←</kbd> <kbd>→</kbd>: the day before or after, on Drops.</li>
+      </ul>
+
+      <nav class="pager" aria-label="Guide pages"><a href="../setup/"><small>Previous</small>First-time setup</a><a class="next" href="../overlays/"><small>Next</small>Overlays</a></nav>
+    </article>
+  </div>
+
+  <footer>
+    <p>Horazon is not affiliated with Project Diablo 2 or Blizzard Entertainment. Item art and data belong to their owners.</p>
+    <p><a href="https://github.com/vit-games/horazon">Releases and issues</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>

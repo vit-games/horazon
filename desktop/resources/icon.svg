@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Horazon app icon: the portal (web/src/components/Portal.tsx, lit) on an indigo tile.
+       Same geometry as the app's portal (a 40x52 viewBox), scaled 7.4 and centred. -->
+  <defs>
+    <radialGradient id="tile" cx="50%" cy="42%" r="75%">
+      <stop offset="0" stop-color="#1d1b3b"/>
+      <stop offset="0.65" stop-color="#110f26"/>
+      <stop offset="1" stop-color="#0b0a1c"/>
+    </radialGradient>
+    <radialGradient id="core" cx="50%" cy="55%" r="55%">
+      <stop offset="0" stop-color="#d6e3ff"/>
+      <stop offset="0.45" stop-color="#5b82ff"/>
+      <stop offset="1" stop-color="#1d2f8a"/>
+    </radialGradient>
+    <clipPath id="inside"><ellipse cx="20" cy="26" rx="14" ry="20"/></clipPath>
+    <filter id="halo" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <filter id="bloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#tile)"/>
+  <rect x="17.5" y="17.5" width="477" height="477" rx="94.5" fill="none" stroke="#2d2a52" stroke-width="3"/>
+  <g transform="translate(108 63.6) scale(7.4)">
+    <ellipse cx="20" cy="26" rx="17" ry="23" fill="#3a55d8" opacity="0.35" filter="url(#bloom)"/>
+    <ellipse cx="20" cy="26" rx="16" ry="22" fill="none" stroke="#5b82ff" stroke-width="3" opacity="0.6" filter="url(#halo)"/>
+    <ellipse cx="20" cy="26" rx="15" ry="21" fill="none" stroke="#05060d" stroke-width="4" opacity="0.85"/>
+    <ellipse cx="20" cy="26" rx="14" ry="20" fill="url(#core)"/>
+    <g clip-path="url(#inside)" fill="none" stroke-linecap="round" stroke="#d6e3ff">
+      <circle cx="20" cy="27" r="11" stroke-opacity="0.55" stroke-width="1.6" stroke-dasharray="14 9 5 12" transform="rotate(-30 20 27)"/>
+      <circle cx="20" cy="25" r="6.5" stroke-opacity="0.7" stroke-width="1.3" stroke-dasharray="8 6 3 8" transform="rotate(40 20 25)"/>
+    </g>
+    <ellipse cx="20" cy="26" rx="15" ry="21" fill="none" stroke="#9dbcff" stroke-width="2.2"/>
+  </g>
+</svg>

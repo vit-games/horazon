@@ -1,0 +1,61 @@
+{
+  "_comment": "Currency kept as drops and listed with uniques/runes (valuable), plus shards counted on Drops -> Currency. Code -> item name. `groups` are listed separately from the rest of the currency on the Currency tab.",
+  "valuable": {
+    "lbox": "Larzuk's Puzzlebox",
+    "lpp": "Larzuk's Puzzlepiece",
+    "rkey": "Skeleton Key",
+    "imrn": "Demonic Cube",
+    "lsvl": "Vial of Lightsong",
+    "llmr": "Lilith's Mirror",
+    "rid": "Horadric Almanac",
+    "rtp": "Horadric Navigator",
+    "pk1": "Key of Terror",
+    "pk2": "Key of Hate",
+    "pk3": "Key of Destruction",
+    "dhn": "Diablo's Horn",
+    "bey": "Baal's Eye",
+    "mbr": "Mephisto's Brain",
+    "tes": "Twisted Essence of Suffering",
+    "ceh": "Charged Essence of Hatred",
+    "bet": "Burning Essence of Terror",
+    "fed": "Festering Essence of Destruction",
+    "toa": "Token of Absolution",
+    "dcso": "Prime Evil Soul",
+    "dcho": "Black Soulstone",
+    "dcbl": "Pure Demonic Essence",
+    "dcma": "Vision of Terror",
+    "rtma": "Voidstone",
+    "rtmv": "Splinter of the Void",
+    "rtmf": "Ancient Bone Fragments",
+    "rtmo": "Trang-Oul's Jawbone",
+    "uba": "Relic of the Ancients",
+    "ubaa": "Sigil of Madawc",
+    "ubab": "Sigil of Talic",
+    "ubac": "Sigil of Korlic",
+    "ubtm": "Pandemonium Talisman",
+    "luca": "Shadow of Hatred",
+    "lucb": "Demonic Insignia",
+    "lucc": "Talisman of Transgression",
+    "lucd": "Flesh of Malic",
+    "scrb": "Horadrim Scarab",
+    "std": "Standard of Heroes",
+    "luv": "The Black Tower Key",
+    "cwss": "Tainted Worldstone Shard"
+  },
+  "shards": {
+    "wss": "Worldstone Shard",
+    "cwss": "Tainted Worldstone Shard",
+    "iwss": "Catalyst Shard"
+  },
+  "groups": {
+    "Horadric items": [
+      "rid",
+      "rtp",
+      "rkey"
+    ],
+    "Mirror & Vial": [
+      "llmr",
+      "lsvl"
+    ]
+  }
+}

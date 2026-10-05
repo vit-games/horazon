@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.cache/
+*.log
+.env
+__pycache__/
+capture/recordings/
+capture/fixtures/
+backups/
+.dev-db/
+desktop/build/
+desktop/release/
+
+# Impeccable design reports, snapshots and screenshots: local only
+.impeccable/

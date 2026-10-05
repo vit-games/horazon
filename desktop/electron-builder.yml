@@ -1,0 +1,50 @@
+# Packaging and publishing (npm run dist, or the release workflow).
+# The app folder is assembled by scripts/stage.mjs; the data folder is never part of it.
+appId: rocks.vit.horazon
+productName: Horazon
+copyright: Copyright © 2026 vit
+directories:
+  app: build/app
+  output: release
+  buildResources: resources
+asar: true
+# Run by Python / PowerShell, so outside the app archive.
+extraResources:
+  - from: ../capture
+    to: capture
+    filter: [pd2capture.py, items.py, bosses.json, nevercount.json, itemstats.json]
+publish:
+  provider: github
+  owner: vit-games
+  repo: horazon
+  # Uploaded as a draft: the app only sees a release once it is published on GitHub.
+  releaseType: draft
+
+linux:
+  # AppImage only: one file for every distro, and it updates itself without root.
+  target: [AppImage]
+  category: Game
+  synopsis: Project Diablo 2 drop tracker
+  # Same as the relaunch in main.ts, without the extra start.
+  executableArgs: [--ozone-platform=x11]
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+win:
+  target: [{ target: nsis, arch: [x64] }]
+  artifactName: ${productName}-Setup-${version}.${ext}
+  extraResources:
+    - from: build/python
+      to: python
+    - from: windows/capture-task.ps1
+      to: windows/capture-task.ps1
+
+nsis:
+  # Per machine: the elevated capture task runs Python from the install folder, which
+  # must not be writable without admin rights.
+  perMachine: true
+  # Assisted installer with a fixed folder: welcome, options (desktop shortcut, start
+  # with Windows; windows/installer.nsh), install, finish with "Run Horazon".
+  oneClick: false
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false
+  include: windows/installer.nsh

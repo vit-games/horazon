@@ -1,0 +1,21 @@
+{
+  "name": "horazon",
+  "private": true,
+  "workspaces": [
+    "server",
+    "web",
+    "desktop"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,yellow \"npm run dev -w server\" \"npm run dev -w web\"",
+    "build": "npm run build -w web && npm run build -w server && npm run build -w desktop",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web && npm run typecheck -w desktop",
+    "site": "vite site --port 4322 --open",
+    "extract-game-data": "python3 scripts/extract_game_data.py",
+    "desktop": "npm run build && npm start -w desktop",
+    "dist": "npm run build && npm run stage -w desktop && npm run pack -w desktop"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

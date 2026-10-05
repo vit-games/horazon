@@ -1,0 +1,29 @@
+{
+  "name": "@pd2lt/desktop",
+  "productName": "Horazon",
+  "version": "0.14.0",
+  "description": "Project Diablo 2 drop, grail and map tracker",
+  "author": "vit",
+  "homepage": "https://github.com/vit-games/horazon",
+  "license": "Unlicense",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "electron .",
+    "stage": "node scripts/stage.mjs",
+    "fetch-python": "node scripts/fetch-python.mjs",
+    "pack": "electron-builder --config electron-builder.yml --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "electron": "44.5.1",
+    "typescript": "^5.9.3",
+    "electron-builder": "^26.15.3"
+  }
+}

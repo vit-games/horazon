@@ -1,0 +1,716 @@
+{
+  "tiers": [
+    {
+      "color": null,
+      "entries": [
+        {
+          "key": "llmr",
+          "kind": "base"
+        },
+        {
+          "key": "lsvl",
+          "kind": "base"
+        },
+        {
+          "key": "Cage of the Unsullied",
+          "kind": "unique"
+        },
+        {
+          "key": "Band of Skulls",
+          "kind": "unique"
+        },
+        {
+          "key": "Aidan's Scar",
+          "kind": "unique"
+        },
+        {
+          "key": "Overlord's Helm",
+          "kind": "unique"
+        },
+        {
+          "key": "Dark Abyss",
+          "kind": "unique"
+        },
+        {
+          "key": "Itherael's Path",
+          "kind": "unique"
+        },
+        {
+          "key": "Hadriel's Hand",
+          "kind": "unique"
+        },
+        {
+          "key": "The Third Eye",
+          "kind": "unique"
+        }
+      ],
+      "id": "jackpot",
+      "name": "Jackpot"
+    },
+    {
+      "color": null,
+      "entries": [
+        {
+          "key": "r33",
+          "kind": "base"
+        },
+        {
+          "key": "r30",
+          "kind": "base"
+        },
+        {
+          "key": "r32",
+          "kind": "base"
+        },
+        {
+          "key": "r31",
+          "kind": "base"
+        },
+        {
+          "key": "imrn",
+          "kind": "base"
+        },
+        {
+          "key": "rtp",
+          "kind": "base"
+        },
+        {
+          "key": "rid",
+          "kind": "base"
+        },
+        {
+          "eth": false,
+          "key": "Tyrael's Might",
+          "kind": "unique"
+        },
+        {
+          "key": "Armageddon's Blade",
+          "kind": "unique"
+        },
+        {
+          "key": "Wisp Projector",
+          "kind": "unique"
+        },
+        {
+          "key": "Kadala's Heirloom",
+          "kind": "unique"
+        },
+        {
+          "key": "Mang Song's Lesson",
+          "kind": "unique"
+        },
+        {
+          "key": "The Stone of Jordan",
+          "kind": "unique"
+        },
+        {
+          "key": "Bul-Kathos' Wedding Band",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Schaefer's Hammer",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Steel Carapace",
+          "kind": "unique"
+        },
+        {
+          "key": "Annihilus",
+          "kind": "unique"
+        }
+      ],
+      "id": "chase",
+      "name": "Chase"
+    },
+    {
+      "color": null,
+      "entries": [
+        {
+          "key": "r29",
+          "kind": "base"
+        },
+        {
+          "key": "r28",
+          "kind": "base"
+        },
+        {
+          "key": "lbox",
+          "kind": "base"
+        },
+        {
+          "key": "rkey",
+          "kind": "base"
+        },
+        {
+          "key": "Mara's Kaleidoscope",
+          "kind": "unique"
+        },
+        {
+          "key": "Metalgrid",
+          "kind": "unique"
+        },
+        {
+          "key": "Templar's Might",
+          "kind": "unique"
+        },
+        {
+          "key": "Doom's Finger",
+          "kind": "unique"
+        },
+        {
+          "key": "Griffon's Eye",
+          "kind": "unique"
+        },
+        {
+          "key": "Highlord's Wrath",
+          "kind": "unique"
+        },
+        {
+          "key": "Schaefer's Hammer",
+          "kind": "unique"
+        },
+        {
+          "key": "Shaftstop",
+          "kind": "unique"
+        },
+        {
+          "key": "Spirit Keeper",
+          "kind": "unique"
+        },
+        {
+          "key": "Steel Carapace",
+          "kind": "unique"
+        },
+        {
+          "key": "Nightwing's Veil",
+          "kind": "unique"
+        },
+        {
+          "key": "Stormlash",
+          "kind": "unique"
+        },
+        {
+          "key": "Aldur's Stony Gaze",
+          "kind": "set"
+        },
+        {
+          "eth": true,
+          "key": "The Grandfather",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Tomb Reaver",
+          "kind": "unique"
+        },
+        {
+          "key": "Fallen Gardens",
+          "kind": "unique"
+        },
+        {
+          "key": "Hellfire Torch",
+          "kind": "unique"
+        },
+        {
+          "key": "Imperial Palace",
+          "kind": "unique"
+        },
+        {
+          "key": "Outer Void",
+          "kind": "unique"
+        }
+      ],
+      "id": "high-value",
+      "name": "High Value"
+    },
+    {
+      "color": null,
+      "entries": [
+        {
+          "key": "r27",
+          "kind": "base"
+        },
+        {
+          "key": "r26",
+          "kind": "base"
+        },
+        {
+          "key": "iwss",
+          "kind": "base"
+        },
+        {
+          "key": "Death's Hand",
+          "kind": "set"
+        },
+        {
+          "key": "Azurewrath",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Arkaine's Valor",
+          "kind": "unique"
+        },
+        {
+          "key": "Astreon's Iron Ward",
+          "kind": "unique"
+        },
+        {
+          "key": "Atma's Scarab",
+          "kind": "unique"
+        },
+        {
+          "key": "Constricting Loop",
+          "kind": "unique"
+        },
+        {
+          "key": "Crown of Ages",
+          "kind": "unique"
+        },
+        {
+          "key": "Death's Fathom",
+          "kind": "unique"
+        },
+        {
+          "key": "Dragonscale",
+          "kind": "unique"
+        },
+        {
+          "key": "Frozen Sorrow",
+          "kind": "unique"
+        },
+        {
+          "key": "Giant Skull",
+          "kind": "unique"
+        },
+        {
+          "key": "Halaberd's Reign",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Kira's Guardian",
+          "kind": "unique"
+        },
+        {
+          "key": "Lava Gout",
+          "kind": "unique"
+        },
+        {
+          "key": "Nature's Peace",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Ormus' Robes",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Ravenlore",
+          "kind": "unique"
+        },
+        {
+          "key": "Seraph's Hymn",
+          "kind": "unique"
+        },
+        {
+          "key": "Siggard's Staunch",
+          "kind": "unique"
+        },
+        {
+          "key": "Skywarden",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Snowclash",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Spirit Ward",
+          "kind": "unique"
+        },
+        {
+          "key": "Stormspire",
+          "kind": "unique"
+        },
+        {
+          "key": "The Cat's Eye",
+          "kind": "unique"
+        },
+        {
+          "key": "The Grandfather",
+          "kind": "unique"
+        },
+        {
+          "key": "Vampire Gaze",
+          "kind": "unique"
+        },
+        {
+          "key": "Veil of Steel",
+          "kind": "unique"
+        },
+        {
+          "key": "Bul-Kathos' Death Band",
+          "kind": "set"
+        },
+        {
+          "key": "Tancred's Hobnails",
+          "kind": "set"
+        },
+        {
+          "key": "Stoneraven",
+          "kind": "unique"
+        },
+        {
+          "key": "Death's Web",
+          "kind": "unique"
+        },
+        {
+          "key": "Tomb Reaver",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Doombringer",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Silks of the Victor",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Death Cleaver",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Guardian Angel",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Purgatory",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Skullder's Ire",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "The Cranium Basher",
+          "kind": "unique"
+        },
+        {
+          "key": "City of Ureh",
+          "kind": "unique"
+        },
+        {
+          "key": "Djinn's Domain",
+          "kind": "unique"
+        },
+        {
+          "key": "Na-Krul's Abyss",
+          "kind": "unique"
+        },
+        {
+          "key": "Warlord of Blood",
+          "kind": "unique"
+        },
+        {
+          "key": "Zhar's Sanctum",
+          "kind": "unique"
+        }
+      ],
+      "id": "valuable",
+      "name": "Valuable"
+    },
+    {
+      "color": null,
+      "entries": [
+        {
+          "key": "Angelic Wings",
+          "kind": "set"
+        },
+        {
+          "key": "Windforce",
+          "kind": "unique"
+        },
+        {
+          "eth": false,
+          "key": "Arachnid Mesh",
+          "kind": "unique"
+        },
+        {
+          "key": "Herald of Zakarum",
+          "kind": "unique"
+        },
+        {
+          "key": "Pus Spitter",
+          "kind": "unique"
+        },
+        {
+          "key": "War Traveler",
+          "kind": "unique"
+        },
+        {
+          "key": "Natalya's Shadow",
+          "kind": "set"
+        },
+        {
+          "key": "Demon Machine",
+          "kind": "unique"
+        },
+        {
+          "key": "Doombringer",
+          "kind": "unique"
+        },
+        {
+          "key": "Silks of the Victor",
+          "kind": "unique"
+        },
+        {
+          "key": "Soul Drainer",
+          "kind": "unique"
+        },
+        {
+          "key": "Steelrend",
+          "kind": "unique"
+        },
+        {
+          "key": "The Redeemer",
+          "kind": "unique"
+        },
+        {
+          "key": "Natalya's Totem",
+          "kind": "set"
+        },
+        {
+          "key": "Widowmaker",
+          "kind": "unique"
+        },
+        {
+          "key": "Abyssal Ward",
+          "kind": "unique"
+        },
+        {
+          "key": "Alma Negra",
+          "kind": "unique"
+        },
+        {
+          "key": "Andariel's Visage",
+          "kind": "unique"
+        },
+        {
+          "key": "Brimstone Rain",
+          "kind": "unique"
+        },
+        {
+          "key": "Carrion Wind",
+          "kind": "unique"
+        },
+        {
+          "key": "Cranebeak",
+          "kind": "unique"
+        },
+        {
+          "key": "Darkforce Spawn",
+          "kind": "unique"
+        },
+        {
+          "key": "Death Cleaver",
+          "kind": "unique"
+        },
+        {
+          "key": "Dracul's Grasp",
+          "kind": "unique"
+        },
+        {
+          "key": "Dwarf Star",
+          "kind": "unique"
+        },
+        {
+          "key": "Firelizard's Talons",
+          "kind": "unique"
+        },
+        {
+          "key": "Ghostflame",
+          "kind": "unique"
+        },
+        {
+          "key": "Gore Rider",
+          "kind": "unique"
+        },
+        {
+          "key": "Guardian Angel",
+          "kind": "unique"
+        },
+        {
+          "key": "Lidless Wall",
+          "kind": "unique"
+        },
+        {
+          "key": "Nosferatu's Coil",
+          "kind": "unique"
+        },
+        {
+          "key": "Purgatory",
+          "kind": "unique"
+        },
+        {
+          "key": "Raekor's Virtue",
+          "kind": "unique"
+        },
+        {
+          "key": "Saracen's Chance",
+          "kind": "unique"
+        },
+        {
+          "key": "Shadow Dancer",
+          "kind": "unique"
+        },
+        {
+          "key": "Silkweave",
+          "kind": "unique"
+        },
+        {
+          "key": "Skullder's Ire",
+          "kind": "unique"
+        },
+        {
+          "key": "The Cranium Basher",
+          "kind": "unique"
+        },
+        {
+          "key": "The Gladiator's Bane",
+          "kind": "unique"
+        },
+        {
+          "key": "Verdungo's Hearty Cord",
+          "kind": "unique"
+        },
+        {
+          "key": "Waterwalk",
+          "kind": "unique"
+        },
+        {
+          "key": "Griswold's Redemption",
+          "kind": "set"
+        },
+        {
+          "key": "Natalya's Mark",
+          "kind": "set"
+        },
+        {
+          "eth": true,
+          "key": "Earth Shifter",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Ribcracker",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Steel Pillar",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Warlord's Trust",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Zerae's Resolve",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "The Reaper's Toll",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Lacerator",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Bul-Kathos' Sacred Charge",
+          "kind": "set"
+        },
+        {
+          "eth": true,
+          "key": "The Gavel of Pain",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Titan's Revenge",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Windhammer",
+          "kind": "unique"
+        },
+        {
+          "eth": true,
+          "key": "Bul-Kathos' Tribal Guardian",
+          "kind": "set"
+        },
+        {
+          "eth": true,
+          "key": "Immortal King's Stone Crusher",
+          "kind": "set"
+        },
+        {
+          "eth": true,
+          "key": "Bloodtree Stump",
+          "kind": "unique"
+        },
+        {
+          "key": "Rainbow Facet",
+          "kind": "unique"
+        },
+        {
+          "key": "Skyfall",
+          "kind": "unique"
+        },
+        {
+          "key": "Nethercrux",
+          "kind": "unique"
+        },
+        {
+          "key": "Giant Maimer",
+          "kind": "unique"
+        },
+        {
+          "key": "Embersworn",
+          "kind": "unique"
+        },
+        {
+          "key": "Sage's Defiance",
+          "kind": "unique"
+        },
+        {
+          "key": "Ephemeral",
+          "kind": "unique"
+        }
+      ],
+      "id": "useful",
+      "name": "Useful"
+    }
+  ]
+}

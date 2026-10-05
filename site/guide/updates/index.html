@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Updates and your data · Horazon guide</title>
+  <meta name="description" content="How Horazon updates and how your data is kept safe." />
+  <link rel="icon" href="../../assets/favicon.svg" />
+  <link rel="stylesheet" href="../../style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="../../" aria-label="Horazon">H<img src="../../assets/portal.svg" alt="" width="26" height="34" />RAZON</a>
+    <nav aria-label="Site">
+      <a href="../install/" aria-current="true">Guide</a>
+      <a href="../faq/">FAQ</a>
+      <a href="https://github.com/vit-games/horazon">GitHub</a>
+      <a class="btn small" href="../../#download">Download</a>
+    </nav>
+  </header>
+
+  <div class="guide">
+    <nav class="rail" aria-label="Guide">
+      <a href="../install/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 1.5v11M4 4l5.5-2.5M4 8l5.5-2.5M10 9.5l-2 3" /></svg>Install</a>
+      <a href="../setup/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3 3.5l8 7M11 3.5l-8 7" /></svg>First-time setup</a>
+      <a href="../using/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3.5 4.5 7 7.5l3.5-3M3.5 9.5 7 12.5l3.5-3" /></svg>Using it</a>
+      <a href="../overlays/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7a5 5 0 0 1 10 0M4.5 7a2.5 2.5 0 0 1 5 0M7 7v5.5" /></svg>Overlays</a>
+      <a href="../updates/" aria-current="page"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2v5a3.5 3.5 0 0 0 7 0V2M7 10.5v2M4.5 12.5h5" /></svg>Updates and your data</a>
+      <a href="../faq/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 1.5l9 11M11.5 1.5l-9 11M7 1.5v11" /></svg>FAQ</a>
+    </nav>
+    <article id="main">
+      <h1>Updates and your data</h1>
+      <p class="lead">Updates arrive on their own, and none of them can touch what you have recorded.</p>
+
+      <h2 id="updates">Updates</h2>
+      <p>Horazon checks GitHub for a new version at start and every few hours, and downloads it in the background. When it is ready, a banner and a notification offer <b>Restart and update</b>. If you ignore them, it installs the next time you quit.</p>
+      <p>Automatic checks can be turned off in the tray menu (<i>Check for updates automatically</i>).</p>
+
+      <h2 id="data">Where your data lives</h2>
+      <p>Outside the app, in <code>%APPDATA%\Horazon</code> on Windows or <code>~/.config/Horazon</code> on Linux. Installing, updating or uninstalling never touches it. The tray menu opens the folder (<i>Open data folder</i>).</p>
+
+      <h2 id="backups">Backups</h2>
+      <ul>
+        <li>One every day, on its own.</li>
+        <li>One before every update is installed, and again before a new version changes the database layout.</li>
+        <li>One whenever you ask: tray → <b>Back up now</b>.</li>
+      </ul>
+      <p>Restore any of them from <b>Setup → Backups</b>. An older version refuses to open data that a newer one has already upgraded, so it can't damage it.</p>
+
+      <h2 id="move">Moving to a new PC</h2>
+      <p>Setup → Backups → download a backup, install Horazon on the new PC, import the file there and restore it.</p>
+
+      <nav class="pager" aria-label="Guide pages"><a href="../overlays/"><small>Previous</small>Overlays</a><a class="next" href="../faq/"><small>Next</small>FAQ</a></nav>
+    </article>
+  </div>
+
+  <footer>
+    <p>Horazon is not affiliated with Project Diablo 2 or Blizzard Entertainment. Item art and data belong to their owners.</p>
+    <p><a href="https://github.com/vit-games/horazon">Releases and issues</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>

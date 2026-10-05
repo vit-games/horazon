@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Horazon · Project Diablo 2 map and drop tracker</title>
+  <meta name="description" content="A desktop app that records your Project Diablo 2 map runs, drops and grail progress while you play, with overlays for streaming. Everything stays on your PC." />
+  <meta property="og:title" content="Horazon: know your pace" />
+  <meta property="og:description" content="Records your Project Diablo 2 map runs, drops and grail while you play. Offline, on your PC." />
+  <meta property="og:image" content="https://vit-games.github.io/horazon/assets/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="./" aria-label="Horazon">H<img src="assets/portal.svg" alt="" width="26" height="34" />RAZON</a>
+    <nav aria-label="Site">
+      <a href="guide/install/">Guide</a>
+      <a href="guide/faq/">FAQ</a>
+      <a href="https://github.com/vit-games/horazon">GitHub</a>
+      <a class="btn small" href="#download">Download</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div>
+        <h1>Your pace</h1>
+        <p class="lead">Horazon records every Project Diablo 2 map, drop and grail find while you play and shows what your days add up to, without you typing a thing.</p>
+        <div class="downloads">
+          <a class="btn primary" data-asset="win" href="https://github.com/vit-games/horazon/releases/latest">Download for Windows</a>
+          <a class="btn" data-asset="appimage" href="https://github.com/vit-games/horazon/releases/latest">Linux AppImage</a>
+        </div>
+        <p class="fine version-line">Windows 10/11 (64-bit) · Linux x86_64</p>
+        <p class="fine">
+          Horazon reads the game's network traffic and never touches the game. PD2's rules forbid third-party software that
+          interacts with the game, so <b>use it at your own risk</b>. <a href="guide/faq/#allowed">Is this allowed?</a>
+        </p>
+      </div>
+
+      <figure class="shot clip">
+        <video src="media/runs.webm" poster="media/runs.webp" width="1280" height="800" muted loop playsinline preload="metadata" aria-label="The Runs page: hovering a find shows its tooltip, the log is filtered to tier 2 maps and scrolled, then By map compares the maps and one map opens to its runs."></video>
+        <button class="clip-toggle" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="i-pause" d="M5 3.5v9M11 3.5v9" /><path class="i-play" d="M5 3.2v9.6L12.6 8z" /></svg></button>
+        <figcaption>The Runs log, filtered by tier, then By map with one map opened. Sample data built from one player's real runs.</figcaption>
+      </figure>
+    </section>
+
+    <section class="band">
+      <div class="band-head">
+        <h2>Every map run, on the record</h2>
+        <p>
+          Each run is logged as you play it: the map and its tier, density, the boss kill, clear time, kills, kills per minute
+          and how much of the map you cleared, next to what dropped in it. Filter the log by tier, map, event or character, or
+          switch to By map to see which maps are worth running. <a href="guide/using/#runs">More about Runs</a>
+        </p>
+      </div>
+    </section>
+
+    <section class="band split">
+      <div>
+        <h2>Every drop, and the grail</h2>
+        <p>
+          Drops are recorded as they hit the ground, with the game's own tooltips, and confirmed when they reach your stash or
+          character. Your item tiers rank them, so the best of a season stands on top.
+        </p>
+        <p>The grail fills itself in: every unique and set, all time or this season, with each first find marked.</p>
+      </div>
+      <figure class="shot">
+        <img src="assets/shots/app-grail-crop.webp" alt="The Grail page: 133 of 450 uniques and 34 of 128 sets found, with the helms listed and the found ones lit." width="896" height="532" loading="lazy" />
+      </figure>
+    </section>
+
+    <section class="band">
+      <div class="band-head">
+        <h2>On stream, one look</h2>
+        <p>
+          Five overlays for OBS, built to read through video compression: the live run tracker, moments when something
+          happens, the drop feed, the grail counter, and a session scoreboard for the end of the night. Set them once on the
+          Stream page. <a href="guide/overlays/">The overlay guide</a>
+        </p>
+      </div>
+      <div class="stage" role="img" aria-label="A stream frame with four overlays: the run tracker top left, a Ber Rune moment at the top, the grail counter bottom left and the drop feed bottom right.">
+        <span>Your game</span>
+        <img class="tracker" src="assets/shots/ov-broadcast.webp" alt="" width="654" height="155" loading="lazy" />
+        <img class="moment" src="assets/shots/ov-moment.webp" alt="" width="420" height="167" loading="lazy" />
+        <img class="grailc" src="assets/shots/ov-grail.webp" alt="" width="374" height="211" loading="lazy" />
+        <img class="feed" src="assets/shots/ov-feed.webp" alt="" width="411" height="250" loading="lazy" />
+      </div>
+    </section>
+
+    <section class="band private">
+      <h2>Offline and private</h2>
+      <dl>
+        <div>
+          <dt>No account, no cloud</dt>
+          <dd>There is no Horazon server and no telemetry. Requests go only to PD2's own site, for your stash, characters and item art, and to GitHub, to check for updates.</dd>
+        </div>
+        <div>
+          <dt>A folder on your PC</dt>
+          <dd>Your data lives outside the app. Installing, updating or uninstalling never touches it.</dd>
+        </div>
+        <div>
+          <dt>Backups on their own</dt>
+          <dd>Every day and before every update. Restore any of them from the Setup page.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="closing" id="download">
+      <h2>Run tonight's maps on the record.</h2>
+      <div>
+        <div class="downloads">
+          <a class="btn primary" data-asset="win" href="https://github.com/vit-games/horazon/releases/latest">Download for Windows</a>
+          <a class="btn" data-asset="appimage" href="https://github.com/vit-games/horazon/releases/latest">Linux AppImage</a>
+        </div>
+        <p class="fine version-line">Windows 10/11 (64-bit) · Linux x86_64</p>
+        <p class="fine">Free. Used at your own risk: see <a href="guide/faq/#allowed">Is this allowed?</a> Then <a href="guide/install/">install and set up</a> in a few minutes.</p>
+      </div>
+    </section>
+
+    <p class="support">
+      Horazon exists because Project Diablo 2 does. PD2 is free, and its seasons and servers are the work of its team and
+      community, so if you want to give something back, <b>support <a href="https://www.projectdiablo2.com/">Project Diablo 2</a> first</b>.
+      After that, <a href="https://github.com/vit-games/horazon/issues">bug reports</a> help Horazon most, and there is a
+      <a href="https://ko-fi.com/vithorn">Ko-fi</a> if you would like to.
+    </p>
+  </main>
+
+  <footer>
+    <p>Horazon is not affiliated with Project Diablo 2 or Blizzard Entertainment. Item art and data belong to their owners.</p>
+    <p><a href="guide/install/">Guide</a></p>
+    <p><a href="https://github.com/vit-games/horazon">Releases and issues</a></p>
+  </footer>
+
+  <script src="site.js"></script>
+</body>
+</html>

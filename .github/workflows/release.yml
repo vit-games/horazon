@@ -1,0 +1,78 @@
+# Push a tag vX.Y.Z (matching desktop/package.json "version") to build the Windows
+# installer and the Linux AppImage and publish them as a GitHub release; scripts/release.sh
+# does this on the release repository. The release stays a draft only while it builds, so
+# the app's update check never finds it without its files, and is published once both
+# builds succeed (a failed build leaves the draft, for a look before trying again).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Tag matches the app version
+        run: |
+          version=$(node -p "require('./desktop/package.json').version")
+          [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME but desktop/package.json has $version"; exit 1; }
+      # One draft up front, so the two build jobs don't each create one. Its page: download
+      # links and the version's CHANGELOG.md section (scripts/release-notes.mjs).
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # A version with a suffix (v0.1.0-beta.1) is a pre-release.
+        run: |
+          node scripts/release-notes.mjs "${GITHUB_REF_NAME#v}" > release-notes.md
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md
+            exit 0
+          fi
+          prerelease=$([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease || true)
+          gh release create "$GITHUB_REF_NAME" --draft $prerelease --title "Horazon ${GITHUB_REF_NAME#v}" --notes-file release-notes.md
+
+  build:
+    needs: draft
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: --linux
+          - os: windows-latest
+            target: --win
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: POSIX shell for npm scripts
+        if: runner.os == 'Windows'
+        run: npm config set script-shell "C:\\Program Files\\Git\\bin\\bash.exe"
+      - run: npm ci
+      - run: npm run build
+      - run: npm run stage -w desktop
+      - name: Bundled Python
+        if: runner.os == 'Windows'
+        run: npm run fetch-python -w desktop
+      - name: Package and upload
+        working-directory: desktop
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npx electron-builder --config electron-builder.yml ${{ matrix.target }} --publish always
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false

@@ -1,0 +1,239 @@
+/* Horazon's site wears the app's world (web/src/index.css): Arcane Sanctuary - indigo void, marble, glyph light. */
+@font-face { font-family: 'Cinzel'; font-weight: 700; font-display: swap; src: url('fonts/cinzel-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel'; font-weight: 800; font-display: swap; src: url('fonts/cinzel-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 400; font-display: swap; src: url('fonts/barlow-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow'; font-weight: 600; font-display: swap; src: url('fonts/barlow-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-display: swap; src: url('fonts/barlow-condensed-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-display: swap; src: url('fonts/barlow-condensed-latin-700-normal.woff2') format('woff2'); }
+
+:root {
+  --bg: #0b0a1c;
+  --rail: #070616;
+  --panel: #13122b;
+  --panel-hi: #1d1b3b;
+  --line: #2d2a52;
+  --text: #e2ded2;
+  --muted: #a8a5c4;
+  --faint: #86839f;
+  /* Glyph blue: links, focus, the download. The only colour that glows. */
+  --accent: #84acff;
+  /* A lighter glyph blue for hovered links. */
+  --marker: #a9c6ff;
+  --display: 'Cinzel', 'Barlow Condensed', serif;
+  --sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  --num: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --wide: 1180px;
+  --gutter: max(20px, calc((100vw - var(--wide)) / 2));
+  /* The app's slab edge: a faint top light and a hard dark base. No soft drop: on the site slabs lie in the page. */
+  --slab: inset 0 1px 0 rgb(226 222 210 / 0.06), 0 1px 0 rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+  accent-color: var(--accent);
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font: 400 17px/1.6 var(--sans);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+/* The two violet washes, fixed behind the page (a layer of their own, so scrolling never repaints them). */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 85% -10%, rgb(88 80 220 / 0.24), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 10% 110%, rgb(120 70 200 / 0.12), transparent 70%);
+}
+::selection { background: rgb(132 172 255 / 0.35); color: var(--text); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+html { scrollbar-color: var(--line) transparent; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { color: var(--marker); }
+h1, h2, h3 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.15; text-wrap: balance; }
+p { margin: 0; }
+b, strong { font-weight: 600; }
+img { max-width: 100%; height: auto; display: block; }
+code, kbd {
+  font: 0.86em ui-monospace, 'Cascadia Mono', 'DejaVu Sans Mono', monospace;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0.08em 0.4em; overflow-wrap: anywhere;
+}
+kbd { font: 600 0.92em var(--num); color: var(--text); }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 16px; top: 12px; z-index: 20; background: var(--panel-hi); padding: 6px 12px; }
+
+/* Top bar: the rail slab laid flat. Solid, as in the app. */
+.top {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px;
+  padding: 12px var(--gutter);
+  background: var(--rail); border-bottom: 1px solid var(--line);
+}
+.wordmark {
+  display: inline-flex; align-items: center; margin-right: auto;
+  font: 800 22px/1 var(--display); letter-spacing: 0.06em; color: var(--text); text-decoration: none;
+}
+.wordmark:hover { color: var(--text); }
+.wordmark img { width: 26px; height: 34px; margin: -8px 1px; }
+.top nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; }
+.top nav a { font-weight: 600; font-size: 15px; color: var(--muted); text-decoration: none; padding: 6px 0; border-bottom: 2px solid transparent; }
+.top nav a:hover { color: var(--text); }
+.top nav a[aria-current] { color: var(--text); border-bottom-color: var(--accent); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--panel-hi);
+  font: 600 17px/1.2 var(--sans); color: var(--text); text-decoration: none;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+.btn:hover { border-color: rgb(132 172 255 / 0.6); color: var(--text); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #0a0d24; }
+.btn.primary:hover { background: var(--marker); border-color: var(--marker); color: #0a0d24; }
+.btn.small { padding: 6px 14px; font-size: 15px; }
+.downloads { display: flex; flex-wrap: wrap; gap: 10px; }
+.fine { font-size: 14px; line-height: 1.5; color: var(--muted); max-width: 46ch; }
+.fine b { color: var(--text); }
+
+main { padding: 0 var(--gutter); }
+
+/* Landing: your pace */
+.hero { display: grid; grid-template-columns: minmax(300px, 5fr) minmax(0, 9fr); gap: 56px; align-items: center; padding: 64px 0 0; }
+.hero h1 { font-size: clamp(40px, 4.6vw, 64px); font-weight: 800; letter-spacing: 0.02em; margin-bottom: 20px; }
+.hero .lead { font-size: 19px; line-height: 1.5; max-width: 34ch; margin-bottom: 28px; }
+.hero .fine { margin-top: 14px; }
+.hero .fine + .fine { margin-top: 10px; }
+
+/* What else it keeps */
+.band { padding: 104px 0 0; }
+.band h2 { font-size: clamp(26px, 2.6vw, 34px); }
+.band p { color: var(--muted); max-width: 52ch; }
+.band p + p { margin-top: 12px; }
+.band p b, .band dd b { color: var(--text); }
+.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: center; }
+.split h2 { margin-bottom: 16px; }
+.shot { margin: 0; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--bg); box-shadow: var(--slab); }
+.shot img { width: 100%; }
+.clip { position: relative; }
+.clip video { display: block; width: 100%; height: auto; background: var(--bg); }
+/* Pause and play, at the right end of the caption bar: nothing of the recording sits under it. */
+.clip figcaption { padding-right: 52px; }
+.clip-toggle {
+  position: absolute; bottom: 5px; right: 8px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0;
+  background: rgb(7 6 22 / 0.85); border: 1px solid var(--line); border-radius: 4px; color: var(--text); cursor: pointer;
+}
+.clip-toggle:hover { border-color: rgb(132 172 255 / 0.6); }
+.clip-toggle svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.clip-toggle .i-play { display: none; fill: currentColor; stroke-width: 1; }
+.clip-toggle.paused .i-pause { display: none; }
+.clip-toggle.paused .i-play { display: block; }
+figcaption { padding: 8px 14px; border-top: 1px solid var(--line); font-size: 14px; color: var(--faint); background: var(--panel); }
+
+.band-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: end; margin-bottom: 32px; }
+/* A stream frame at 16:9 with the overlays where a streamer would put them. */
+.stage { display: grid; padding: 24px 28px; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 4px; background: var(--rail); box-shadow: var(--slab); overflow: hidden; }
+.stage > * { grid-area: 1 / 1; }
+.stage > span { place-self: center; font: 600 15px var(--num); letter-spacing: 0.08em; color: var(--faint); }
+.stage .tracker { place-self: start; width: 37%; }
+.stage .moment { place-self: start center; width: 24%; margin-top: 1.5%; }
+.stage .feed { place-self: end; width: 23%; }
+.stage .grailc { place-self: end start; width: 21.5%; }
+
+.private { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; }
+.private dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 32px; }
+.private dt { font: 600 19px/1.3 var(--sans); color: var(--text); padding-top: 14px; border-top: 1px solid var(--line); }
+.private dd { margin: 6px 0 0; color: var(--muted); }
+.private dl > div { display: contents; }
+.private dt { grid-row: 1; }
+.private dd { grid-row: 2; }
+
+.closing { position: relative; margin-top: 112px; padding: 72px 0; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: center; }
+/* The band's ground runs edge to edge; its content keeps the page gutter. */
+.closing::before { content: ''; position: absolute; inset: 0 calc(-1 * var(--gutter)); z-index: -1; background: var(--rail); border-block: 1px solid var(--line); }
+.closing h2 { font-size: clamp(30px, 3.4vw, 44px); font-weight: 800; }
+.closing .fine { margin-top: 14px; }
+.support { padding: 56px 0 72px; color: var(--muted); max-width: 64ch; }
+.support b { color: var(--text); }
+
+footer { padding: 24px var(--gutter) 40px; border-top: 1px solid var(--line); font-size: 14px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 6px 24px; }
+footer a { color: var(--muted); }
+footer p:first-child { margin-right: auto; }
+
+/* The guide: the app's rail around a calm column. */
+.guide { display: grid; grid-template-columns: 212px minmax(0, 1fr); gap: 56px; align-items: start; padding: 0 var(--gutter); }
+.rail { position: sticky; top: 59px; padding: 32px 0; display: flex; flex-direction: column; gap: 2px; }
+.rail a { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 4px; font-weight: 600; font-size: 15px; color: var(--muted); text-decoration: none; }
+.rail a svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.5; }
+.rail a:hover { color: var(--text); }
+.rail a:hover svg { opacity: 1; }
+.rail a[aria-current] { background: var(--panel-hi); color: var(--text); }
+.rail a[aria-current] svg { color: var(--accent); opacity: 1; filter: drop-shadow(0 0 4px var(--accent)); }
+
+article { padding: 40px 0 72px; max-width: 880px; min-width: 0; }
+article h1 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+article .lead { font-size: 19px; color: var(--muted); max-width: 60ch; margin-bottom: 8px; }
+article h2 { font-size: 22px; margin: 48px 0 12px; scroll-margin-top: 76px; }
+article h3 { font: 600 18px/1.3 var(--sans); margin: 28px 0 6px; }
+article p, article li, article dd { max-width: 68ch; }
+article p + p, article p + ul, article p + ol, article ul + p, article ol + p { margin-top: 12px; }
+article ul, article ol { margin: 0; padding-left: 1.3em; }
+article li + li { margin-top: 6px; }
+article li::marker { color: var(--faint); font-family: var(--num); font-weight: 600; }
+article .shot { margin: 24px 0 8px; }
+article .shot a { display: block; }
+
+.steps { list-style: none; padding: 0; counter-reset: step; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 44px minmax(0, 1fr); padding: 20px 0; border-top: 1px solid var(--line); max-width: none; }
+.steps > li + li { margin-top: 0; }
+.steps > li::before { content: counter(step); font: 700 34px/1 var(--num); color: var(--muted); }
+.steps h2 { margin: 0 0 8px; }
+.steps > li > div > * { max-width: 68ch; }
+
+.note { margin: 20px 0; padding: 14px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; max-width: 68ch; color: var(--muted); }
+.note b { color: var(--text); }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; }
+.cols h2 { margin-top: 32px; }
+
+/* An overlay: its picture, what it shows, its Browser Source address and size. */
+.ov { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; padding: 28px 0; border-top: 1px solid var(--line); }
+.ov h2 { margin: 0 0 8px; }
+.ov .pic { display: grid; place-items: center; padding: 20px; border: 1px solid var(--line); border-radius: 4px; background: var(--rail); }
+.ov.wide { grid-template-columns: minmax(0, 1fr); }
+.ov.wide .pic { padding: 0; overflow: hidden; }
+.src { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.src code { padding: 5px 9px; }
+.ov .src code { flex: 1 1 100%; font-size: 14px; }
+.src .size { font: 600 15px var(--num); color: var(--muted); font-variant-numeric: tabular-nums; }
+.copy { font: 600 14px var(--sans); color: var(--text); background: var(--panel-hi); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.copy:hover { border-color: rgb(132 172 255 / 0.6); }
+
+details { border-top: 1px solid var(--line); max-width: 760px; scroll-margin-top: 76px; }
+details:last-of-type { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; padding: 14px 28px 14px 0; font-weight: 600; font-size: 18px; list-style: none; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ''; position: absolute; right: 6px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: translateY(-70%) rotate(45deg); transition: transform 0.15s; }
+details[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+summary:hover { color: var(--marker); }
+details > p { padding: 0 0 18px; color: var(--muted); }
+details > p b { color: var(--text); }
+
+.pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); }
+.pager a { text-decoration: none; font-weight: 600; font-size: 18px; }
+.pager small { display: block; font: 600 13px var(--num); letter-spacing: 0.04em; color: var(--faint); }
+.pager .next { margin-left: auto; text-align: right; }
+
+@media (max-width: 900px) {
+  .hero, .split, .band-head, .private, .closing, .cols, .ov { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .hero { padding-top: 40px; align-items: start; }
+  .band { padding-top: 72px; }
+  .private dl { grid-template-columns: minmax(0, 1fr); }
+  .private dt, .private dd { grid-row: auto; }
+  .private dd { margin-bottom: 16px; }
+  .guide { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .rail { position: static; flex-direction: row; flex-wrap: wrap; padding: 12px 0 0; }
+  .stage { padding: 10px; }
+  .stage .moment { display: none; }
+}

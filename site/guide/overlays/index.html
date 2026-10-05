@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overlays · Horazon guide</title>
+  <meta name="description" content="Horazon overlays for OBS: run tracker, moments, drop feed, grail counter and session scoreboard." />
+  <link rel="icon" href="../../assets/favicon.svg" />
+  <link rel="stylesheet" href="../../style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="../../" aria-label="Horazon">H<img src="../../assets/portal.svg" alt="" width="26" height="34" />RAZON</a>
+    <nav aria-label="Site">
+      <a href="../install/" aria-current="true">Guide</a>
+      <a href="../faq/">FAQ</a>
+      <a href="https://github.com/vit-games/horazon">GitHub</a>
+      <a class="btn small" href="../../#download">Download</a>
+    </nav>
+  </header>
+
+  <div class="guide">
+    <nav class="rail" aria-label="Guide">
+      <a href="../install/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 1.5v11M4 4l5.5-2.5M4 8l5.5-2.5M10 9.5l-2 3" /></svg>Install</a>
+      <a href="../setup/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3 3.5l8 7M11 3.5l-8 7" /></svg>First-time setup</a>
+      <a href="../using/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3.5 4.5 7 7.5l3.5-3M3.5 9.5 7 12.5l3.5-3" /></svg>Using it</a>
+      <a href="../overlays/" aria-current="page"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7a5 5 0 0 1 10 0M4.5 7a2.5 2.5 0 0 1 5 0M7 7v5.5" /></svg>Overlays</a>
+      <a href="../updates/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2v5a3.5 3.5 0 0 0 7 0V2M7 10.5v2M4.5 12.5h5" /></svg>Updates and your data</a>
+      <a href="../faq/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 1.5l9 11M11.5 1.5l-9 11M7 1.5v11" /></svg>FAQ</a>
+    </nav>
+    <article id="main">
+      <h1>Overlays</h1>
+      <p class="lead">Overlays are transparent pages you add to OBS as Browser Sources. They come in one look, made to read at stream size, and update on their own while you play.</p>
+      <p style="margin-top: 16px">In OBS: <b>Sources → + → Browser</b>, paste the address and enter the size next to it. The <b>Stream</b> page (key <kbd>7</kbd>) builds each address with its options, shows a preview and has a Copy button. Overlays work only while Horazon is running.</p>
+      <figure class="shot clip">
+        <video src="../../media/overlays.webm" poster="../../media/overlays.webp" width="960" height="720" muted loop playsinline preload="none" aria-label="A stream scene: the moments overlay shows a Ber rune, a split beaten by 16 seconds and a boss killed, one after another, above the drop feed with grail progress."></video>
+        <button class="clip-toggle" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="i-pause" d="M5 3.5v9M11 3.5v9" /><path class="i-play" d="M5 3.2v9.6L12.6 8z" /></svg></button>
+        <figcaption>Moments above the drop feed, on the overlays' own sample data.</figcaption>
+      </figure>
+      <div style="margin-top: 32px">
+      <section class="ov" id="tracker">
+        <div class="pic"><img src="../../assets/shots/ov-broadcast.webp" alt="Run tracker: T3 Ancestral Trial, 1,224 kills, 2:47, 54% cleared, 16 seconds ahead of the best at the 50% split." width="654" height="155" loading="lazy" /></div>
+        <div>
+          <h2>Run tracker</h2>
+          <p>For viewers: the map, the clock and kills large, the share of the map cleared, and the latest split against your best. It shows while a map run is open and hides between maps.</p>
+          <p class="src"><code>http://127.0.0.1:8080/killcounter?view=broadcast</code> <button class="copy" type="button" data-copy="http://127.0.0.1:8080/killcounter?view=broadcast">Copy</button> <span class="size">680 × 184</span></p>
+        </div>
+      </section>
+      <section class="ov" id="pilot">
+        <div class="pic"><img src="../../assets/shots/ov-pilot.webp" alt="Pilot run tracker: kills, clock, kill rate chart and split times against the best clear." width="374" height="483" loading="lazy" /></div>
+        <div>
+          <h2>Run tracker, pilot version</h2>
+          <p>For you: everything the run is measured by. Kill rate, map time against your best and median, every split and the boss.</p><p>The desktop app shows this one above the game: tray → <b>Map kill counter overlay</b>, and <b>Move kill counter…</b> to place it.</p>
+          <p class="src"><code>http://127.0.0.1:8080/killcounter</code> <button class="copy" type="button" data-copy="http://127.0.0.1:8080/killcounter">Copy</button> <span class="size">392 × 520</span></p>
+        </div>
+      </section>
+      <section class="ov" id="moments">
+        <div class="pic"><img src="../../assets/shots/ov-moment.webp" alt="A moment: Ber Rune, high rune." width="420" height="167" loading="lazy" /></div>
+        <div>
+          <h2>Moments</h2>
+          <p>Empty until the run gives something: a drop in your tiers, a new grail find or a Vex+ rune, a split beaten, a new best clear, the boss down. Each one opens, holds six seconds and closes.</p>
+          <p class="src"><code>http://127.0.0.1:8080/overlay/moments</code> <button class="copy" type="button" data-copy="http://127.0.0.1:8080/overlay/moments">Copy</button> <span class="size">680 × 208</span></p>
+        </div>
+      </section>
+      <section class="ov" id="feed">
+        <div class="pic"><img src="../../assets/shots/ov-feed.webp" alt="Drop feed: today's notable drops, Griffon's Eye and Tal Rasha's Guardianship sparkling as new grail finds, Harlequin Crest, and the day's runes and keys." width="411" height="250" loading="lazy" /></div>
+        <div>
+          <h2>Drop feed</h2>
+          <p>Each day's best drops; new drops slide in live, and a new grail find gets a sparkle. Grail progress itself is the grail counter's job. The Stream page sets how many drops, the lowest rune shown, the layout and the size, and gives the size to enter in OBS.</p>
+          <p class="src"><code>http://127.0.0.1:8080/overlay</code> <button class="copy" type="button" data-copy="http://127.0.0.1:8080/overlay">Copy</button> <span class="size">size on the Stream page</span></p>
+        </div>
+      </section>
+      <section class="ov" id="grail">
+        <div class="pic"><img src="../../assets/shots/ov-grail.webp" alt="Grail counter: 212 of 450 uniques, 58 of 128 sets." width="374" height="211" loading="lazy" /></div>
+        <div>
+          <h2>Grail counter</h2>
+          <p>Uniques and sets found, each with its bar in the game's quality colour. All time or the current season.</p>
+          <p class="src"><code>http://127.0.0.1:8080/overlay/grail</code> <button class="copy" type="button" data-copy="http://127.0.0.1:8080/overlay/grail">Copy</button> <span class="size">392 × 244</span></p>
+        </div>
+      </section>
+      <section class="ov wide" id="session">
+        <div class="pic"><img src="../../assets/shots/ov-session.webp" alt="Session scoreboard: tonight's runs by map with best clears, the best find and the totals for the night." width="1280" height="720" loading="lazy" /></div>
+        <div>
+          <h2>Session scoreboard</h2>
+          <p>A full-screen scene for a break or the end of a stream: tonight's maps as a board (fastest first, new bests in green), the best find, and the night's totals.</p>
+          <p class="src"><code>http://127.0.0.1:8080/overlay/session</code> <button class="copy" type="button" data-copy="http://127.0.0.1:8080/overlay/session">Copy</button> <span class="size">1920 × 1080</span></p>
+        </div>
+      </section>
+      </div>
+      <p class="note">The addresses use port 8080. If you <a href="../faq/#port">changed the port</a>, they change with it; the Stream page always shows the right ones.</p>
+
+      <nav class="pager" aria-label="Guide pages"><a href="../using/"><small>Previous</small>Using it</a><a class="next" href="../updates/"><small>Next</small>Updates and your data</a></nav>
+    </article>
+  </div>
+
+  <footer>
+    <p>Horazon is not affiliated with Project Diablo 2 or Blizzard Entertainment. Item art and data belong to their owners.</p>
+    <p><a href="https://github.com/vit-games/horazon">Releases and issues</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FAQ · Horazon guide</title>
+  <meta name="description" content="Questions about Horazon: how it reads the game, whether it is allowed, privacy and fixes." />
+  <link rel="icon" href="../../assets/favicon.svg" />
+  <link rel="stylesheet" href="../../style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="../../" aria-label="Horazon">H<img src="../../assets/portal.svg" alt="" width="26" height="34" />RAZON</a>
+    <nav aria-label="Site">
+      <a href="../install/">Guide</a>
+      <a href="../faq/" aria-current="true">FAQ</a>
+      <a href="https://github.com/vit-games/horazon">GitHub</a>
+      <a class="btn small" href="../../#download">Download</a>
+    </nav>
+  </header>
+
+  <div class="guide">
+    <nav class="rail" aria-label="Guide">
+      <a href="../install/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 1.5v11M4 4l5.5-2.5M4 8l5.5-2.5M10 9.5l-2 3" /></svg>Install</a>
+      <a href="../setup/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3 3.5l8 7M11 3.5l-8 7" /></svg>First-time setup</a>
+      <a href="../using/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5v11M3.5 4.5 7 7.5l3.5-3M3.5 9.5 7 12.5l3.5-3" /></svg>Using it</a>
+      <a href="../overlays/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7a5 5 0 0 1 10 0M4.5 7a2.5 2.5 0 0 1 5 0M7 7v5.5" /></svg>Overlays</a>
+      <a href="../updates/"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2v5a3.5 3.5 0 0 0 7 0V2M7 10.5v2M4.5 12.5h5" /></svg>Updates and your data</a>
+      <a href="../faq/" aria-current="page"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 1.5l9 11M11.5 1.5l-9 11M7 1.5v11" /></svg>FAQ</a>
+    </nav>
+    <article id="main">
+      <h1>FAQ</h1>
+      <p class="lead" style="margin-bottom: 28px">How it works, whether it is allowed, and what to do when something isn't recording.</p>
+      <details id="how-capture">
+        <summary>How does it see my drops? Does it touch the game?</summary>
+        <p>It never touches the game. Horazon reads the network traffic between your PC and the PD2 game server, the same data the game itself receives, and decodes item drops, area changes and kills from it. Nothing is injected, no game memory is read and nothing is sent to the server. Reading network traffic needs extra rights, which is why there is a one-time admin prompt. Your stash and characters are confirmed through PD2's public API.</p>
+      </details>
+      <details id="kills">
+        <summary>Why don't my kills match <code>.kills</code>?</summary>
+        <p>They should. Horazon counts every monster it sees die in your game, whoever killed it, the way <code>.kills</code> does, and leaves out what <code>.kills</code> leaves out: summons, traps and monster-cast hydras. Games Horazon didn't record (capture off, or joined before capture started) aren't counted. To check, type <code>.kills</code> at the start and end of one game: the difference should equal the game's kills on the Session page. If it doesn't, report it in Issues with the time of the game.</p>
+      </details>
+      <details id="allowed">
+        <summary>Is this allowed by PD2?</summary>
+        <p>Project Diablo 2's rules forbid third-party software that interacts with the game. Horazon doesn't interact with the game or its files, but that is a judgement call. <b>Use it at your own risk</b>, and check the current rules yourself. Horazon isn't affiliated with or endorsed by Project Diablo 2 or Blizzard.</p>
+      </details>
+      <details id="privacy">
+        <summary>Does anything leave my PC?</summary>
+        <p>Requests go to PD2's own API and site (your stash and characters, the season list, and item art the app doesn't ship) and to GitHub, where the app checks for a new version; the tray menu can turn that check off. There is no telemetry and no Horazon server.</p>
+      </details>
+      <details id="token">
+        <summary>Is it safe to paste my PD2 token?</summary>
+        <p>The token is your login to the PD2 website, so treat it like a password and paste it only into Horazon. Horazon uses it to read your shared stash from PD2's API and stores it in the database on your PC, nowhere else. Without it everything still works, except that items stashed right after pickup are never seen and stashed uniques and sets are missing from the grail.</p>
+      </details>
+      <details id="permission">
+        <summary>Capture says "Needs permission" or shows an error</summary>
+        <p><b>Linux:</b> Setup → Game connection → <i>Grant permission</i> again (or the same item in the tray menu). A system Python upgrade breaks the private copy.<br /><b>Windows:</b> use the tray item, which re-registers the capture task. If drops still don't show up, check that the Windows Firewall rule <i>Horazon Capture</i> exists and that a VPN isn't carrying the game traffic.</p>
+      </details>
+      <details id="missed-game">
+        <summary>A game I was already in wasn't recorded</summary>
+        <p>A game is recognised from its first packets, so capture has to be running before you join. With <i>Start and stop capture with the game</i> on, that happens when the game starts.</p>
+      </details>
+      <details id="tray">
+        <summary>I can't find the tray icon</summary>
+        <p>GNOME shows tray icons only with an extension such as <i>AppIndicator and KStatusNotifierItem Support</i>. Capture permission can also be granted on the Setup page, under Game connection.</p>
+      </details>
+      <details id="port">
+        <summary>Port 8080 is already in use</summary>
+        <p>Change <code>"port"</code> in <code>config.json</code> in the data folder (tray → <i>Open data folder</i>) and restart Horazon. Overlay addresses use the new port.</p>
+      </details>
+      <details id="move">
+        <summary>How do I move to a new PC?</summary>
+        <p>Setup → Backups → download a backup, install Horazon on the new PC, import the file there and restore it.</p>
+      </details>
+
+      <nav class="pager" aria-label="Guide pages"><a href="../updates/"><small>Previous</small>Updates and your data</a><a class="next" href="../../#download"><small>Ready</small>Download</a></nav>
+    </article>
+  </div>
+
+  <footer>
+    <p>Horazon is not affiliated with Project Diablo 2 or Blizzard Entertainment. Item art and data belong to their owners.</p>
+    <p><a href="https://github.com/vit-games/horazon">Releases and issues</a></p>
+  </footer>
+
+  <script src="../../site.js"></script>
+</body>
+</html>

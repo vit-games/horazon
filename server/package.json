@@ -1,0 +1,23 @@
+{
+  "name": "@pd2lt/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "HOST=127.0.0.1 PGLITE_DIR=../.dev-db tsx watch --env-file-if-exists=../.env src/index.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.json && cp -r src/sql dist/ && cp src/seed/*.json dist/seed/ && cp -r src/assets dist/",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@fastify/static": "^10.1.5",
+    "fastify": "^5.12.5",
+    "socket.io-client": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/pg": "^8.23.1",
+    "@types/socket.io-client": "^1.4.36",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
