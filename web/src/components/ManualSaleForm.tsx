@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ItemIcon } from './ItemIcon';
-import { addManualSale, fetchHoldings } from '../lib/api';
+import { fetchHoldings, saveManualSale, type ManualSale } from '../lib/api';
 import { CURRENCY_BY_CODE, CURRENCY_CATALOG, currencyItem } from '../lib/currencyCatalog';
 import { fieldSm as input, btnSm as button } from '../lib/ui';
 
@@ -8,14 +8,15 @@ import { fieldSm as input, btnSm as button } from '../lib/ui';
 /**
  * Record a sale outside item listings: click the currencies sold to highlight them (those you
  * hold right now come first) and/or describe it (a carry, a boss kill), then what you received.
+ * Given a `sale`, edits that one instead.
  */
-export function ManualSaleForm({ onDone }: { onDone: () => void }) {
+export function ManualSaleForm({ sale, onDone }: { sale?: ManualSale; onDone: () => void }) {
   const [holdings, setHoldings] = useState<Record<string, number>>({});
   const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState('');
-  const [picked, setPicked] = useState<Map<string, string>>(new Map()); // code -> qty draft
-  const [hr, setHr] = useState('');
-  const [note, setNote] = useState('');
+  const [picked, setPicked] = useState<Map<string, string>>(() => new Map(sale?.items.map((i) => [i.code, String(i.qty)]))); // code -> qty draft
+  const [hr, setHr] = useState(sale ? String(sale.sold_hr) : '');
+  const [note, setNote] = useState(sale?.note ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,14 +54,14 @@ export function ManualSaleForm({ onDone }: { onDone: () => void }) {
         if (!valid) return;
         setBusy(true);
         setError(null);
-        addManualSale(items, value, note).then(onDone, (err: Error) => {
+        saveManualSale(items, value, note, sale?.id).then(onDone, (err: Error) => {
           setError(err.message);
           setBusy(false);
         });
       }}
     >
       <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm text-text">Manual sale</span>
+        <span className="text-sm text-text">{sale ? 'Edit sale' : 'Manual sale'}</span>
         <span className="text-xs text-muted">Currency and/or a service</span>
         <input className={`${input} w-48`} placeholder="Search currency…" value={search} onChange={(e) => setSearch(e.target.value)} />
         <label className="flex items-center gap-1.5 text-xs text-muted">

@@ -1,54 +1,37 @@
-import { useId } from 'react';
+import portalAnim from '../assets/icons/portal.webp';
+import portalStill from '../assets/icons/portal.png';
+
+/** Width over height of the portal sprite. */
+const PORTAL_ASPECT = 36 / 62;
 
 export type PortalState = 'live' | 'idle' | 'error';
 
-const COLORS: Record<PortalState, { ring: string; glow: string; core: string; deep: string }> = {
-  live: { ring: '#9dbcff', glow: '#5b82ff', core: '#d6e3ff', deep: '#1d2f8a' },
-  idle: { ring: '#4a5380', glow: '#2a3260', core: '#5a6390', deep: '#141832' },
-  error: { ring: '#ef5d5d', glow: '#a3262a', core: '#ffb3a8', deep: '#3a0c12' },
+/** Idle is the still portal dimmed; error is it turned red. */
+const LOOK: Record<PortalState, string> = {
+  live: '',
+  idle: 'opacity-60 saturate-[.3] brightness-75',
+  error: 'hue-rotate-[145deg] saturate-150',
 };
 
 /**
- * Horazon's portal: the O of the wordmark and the app's status light. It turns while the
- * capture is live, sits dim and still when idle, and cracks red when a source is failing.
+ * Horazon's portal (a SpriteCook pixel-art loop, see web/src/assets/icons/README.md): the O of the
+ * wordmark and the app's status light. It swirls while the capture is live, sits dim and still when
+ * idle, and burns red when a source is failing. Reduced motion gets the still frame.
  */
 export function Portal({ state, size = 28, title }: { state: PortalState; size?: number; title?: string }) {
-  const id = useId().replace(/:/g, '');
-  const c = COLORS[state];
   return (
-    <svg
-      className="portal shrink-0"
-      data-state={state}
-      width={size * (40 / 52)}
-      height={size}
-      viewBox="0 0 40 52"
-      role={title ? 'img' : undefined}
-      aria-label={title}
-      aria-hidden={title ? undefined : true}
-    >
-      {title && <title>{title}</title>}
-      <defs>
-        <radialGradient id={`${id}c`} cx="50%" cy="55%" r="55%">
-          <stop offset="0" stopColor={c.core} />
-          <stop offset="0.45" stopColor={c.glow} />
-          <stop offset="1" stopColor={c.deep} />
-        </radialGradient>
-        <clipPath id={`${id}k`}>
-          <ellipse cx="20" cy="26" rx="14" ry="20" />
-        </clipPath>
-        <filter id={`${id}g`} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2.4" />
-        </filter>
-      </defs>
-      {state !== 'idle' && <ellipse cx="20" cy="26" rx="16" ry="22" fill="none" stroke={c.glow} strokeWidth="3" opacity="0.55" filter={`url(#${id}g)`} />}
-      <ellipse className="portal-core" cx="20" cy="26" rx="14" ry="20" fill={`url(#${id}c)`} />
-      <g clipPath={`url(#${id}k)`} fill="none" strokeLinecap="round">
-        <circle className="portal-swirl" cx="20" cy="27" r="11" stroke={c.core} strokeOpacity="0.55" strokeWidth="1.6" strokeDasharray="14 9 5 12" />
-        <circle className="portal-swirl reverse" cx="20" cy="25" r="6.5" stroke={c.core} strokeOpacity="0.7" strokeWidth="1.3" strokeDasharray="8 6 3 8" />
-      </g>
-      <ellipse cx="20" cy="26" rx="15" ry="21" fill="none" stroke={c.ring} strokeWidth="2.2" />
-      {state === 'error' && <path d="M21 5 l-3 9 l5 5 l-4 8 l4 6 l-3 9" fill="none" stroke="#0b0d1a" strokeWidth="2.2" strokeLinejoin="round" />}
-    </svg>
+    <picture className="portal inline-flex shrink-0" data-state={state}>
+      {state === 'live' && <source media="(prefers-reduced-motion: reduce)" srcSet={portalStill} />}
+      <img
+        src={state === 'live' ? portalAnim : portalStill}
+        width={Math.round(size * PORTAL_ASPECT)}
+        height={size}
+        alt={title ?? ''}
+        title={title}
+        draggable={false}
+        className={LOOK[state]}
+      />
+    </picture>
   );
 }
 

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { ItemIcon } from '../components/ItemIcon';
 import { FloatingTooltip } from '../components/ItemTooltip';
-import { fetchGrail, type GrailFound, type Range } from '../lib/api';
+import { fetchGrail, markGrail, type GrailFound, type Range } from '../lib/api';
 import { CATALOG, COUNTED_KEYS, REQUIRED, SLOT_ORDER, grailCounts, bases, clusterOf, pseudoItem, type Entry } from '../lib/grail';
 import { useChanges } from '../lib/live';
 import { fmtNumber } from '../lib/series';
@@ -150,7 +150,7 @@ export function GrailView({ range }: { range: Range }) {
                   return (
                     <li
                       key={e.name}
-                      className="flex items-center gap-2 rounded-sm px-1.5 py-1 hover:bg-panel-hi"
+                      className="group flex items-center gap-2 rounded-sm px-1.5 py-1 hover:bg-panel-hi"
                       onMouseMove={(ev) => setHover({ item, x: ev.clientX, y: ev.clientY })}
                     >
                       <span className={f ? '' : 'opacity-30 grayscale'}>
@@ -158,12 +158,21 @@ export function GrailView({ range }: { range: Range }) {
                       </span>
                       <div className="min-w-0">
                         <div className={`truncate text-sm ${f ? `font-semibold ${kind === 'Unique' ? 'text-q-unique' : 'text-q-set'}` : 'text-faint'}`}>{e.name}</div>
-                        <div className={`truncate text-xs ${f ? 'text-muted' : 'text-faint'}`} title={f?.baseline ? 'Owned when tracking began' : undefined}>
+                        <div className={`truncate text-xs ${f ? 'text-muted' : 'text-faint'}`} title={f?.baseline ? 'Marked as found by you' : undefined}>
                           {/* The base always; when it was found as a faint suffix. */}
                           {bases[e.base_code]?.name}
-                          {f && <span className="text-faint"> · {f.baseline ? 'owned at start' : dateFmt.format(new Date(f.found_at))}</span>}
+                          {f && <span className="text-faint"> · {f.baseline ? 'marked' : dateFmt.format(new Date(f.found_at))}</span>}
                         </div>
                       </div>
+                      {/* Backfill: finds from before tracking, or outside the capture, are marked by hand. A find the capture saw stays. */}
+                      {(!f || f.baseline) && (
+                        <button
+                          className="ml-auto shrink-0 rounded-sm px-1.5 py-0.5 text-xs text-faint opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-line hover:text-text"
+                          onClick={() => markGrail(kind, e.name, !f).catch(() => {})}
+                        >
+                          {f ? 'Unmark' : 'Mark found'}
+                        </button>
+                      )}
                     </li>
                   );
                 })}
@@ -209,9 +218,7 @@ function Highlights({ found }: { found: GrailFound[] }) {
   const milestones: Milestone[] = [];
   const baseline = found.filter((f) => f.baseline && COUNTED_KEYS.has(`${f.quality}:${f.name}`));
   const finds = found.filter((f) => !f.baseline && COUNTED_KEYS.has(`${f.quality}:${f.name}`)).sort((a, b) => a.found_at.localeCompare(b.found_at));
-  if (baseline.length) {
-    milestones.push({ t: baseline.map((f) => f.found_at).sort()[0], label: `Started tracking with ${baseline.length} grail items owned` });
-  }
+  // Marks are a backfill, not finds: they raise the counts below (and can complete a set) but make no count milestone of their own.
 
   const steps = [10, 25, 50, 75, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550];
   const totalCatalog = REQUIRED.Unique + REQUIRED.Set;
@@ -223,7 +230,7 @@ function Highlights({ found }: { found: GrailFound[] }) {
     }
   });
 
-  // Completed sets: every item of the set found; dated by the last missing piece.
+  // Completed sets: every item of the set found or marked; dated by the last missing piece.
   const setItems = new Map<string, string[]>();
   for (const e of CATALOG) if (e.quality === 'Set') setItems.set(e.group, [...(setItems.get(e.group) ?? []), e.name]);
   const setFound = new Map(found.filter((f) => f.quality === 'Set').map((f) => [f.name, f.found_at]));

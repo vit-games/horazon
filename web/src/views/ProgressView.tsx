@@ -5,14 +5,14 @@ import { ActivityCalendar, type CalendarMetric } from '../components/ActivityCal
 import { CurrencyTable } from '../components/CurrencyTable';
 import { Figures } from '../components/Figures';
 import { Ledger } from '../components/Ledger';
-import { RuneHoldings } from '../components/RuneHoldings';
+import { RuneStash } from '../components/RuneStash';
 import { CharacterPicker } from '../components/CharacterPicker';
 import { ItemIcon } from '../components/ItemIcon';
 import { CaptureHowTo, MapOverview, ZoneOverview, focusFromHash } from '../components/MapSections';
 import { DropsTabs } from './DropsView';
 import { allSessions } from './SessionView';
 import { dayLabel, formatTime } from '../lib/time';
-import { RuneBreakdown } from '../components/RuneBreakdown';
+import { currencyLabel } from '../lib/currencyDrops';
 import { Seg } from '../components/Seg';
 import { fetchDrops, fetchStats, rangeParams, type Range } from '../lib/api';
 import {
@@ -287,14 +287,6 @@ export function ProgressView({ range, section, title }: { range: Range; section:
   // Currency tab: runes (per rune) and valuable currency found in the period.
   const foundInRange = myDrops.filter((d) => inRange(d.found_at));
   const currencyFound = foundInRange.filter((d) => CURRENCY_CODES.has(d.item.base_code));
-  const runesFound = new Map<number, { count: number; sample: Drop }>();
-  for (const d of foundInRange) {
-    const n = runeNumber(d.item);
-    if (n === null) continue;
-    const entry = runesFound.get(n) ?? { count: 0, sample: d };
-    entry.count += d.quantity;
-    runesFound.set(n, entry);
-  }
 
 
   // Worldstone Shards picked up (counted whether or not the drop list shows them).
@@ -432,11 +424,9 @@ export function ProgressView({ range, section, title }: { range: Range; section:
 
       {subtab === 'currency' && (
         <>
-          <RuneBreakdown runes={runesFound} />
-          <RuneHoldings />
-          <CurrencyTable drops={currencyFound} maps={mapsGained ?? 0} />
-          {/* The tracked rune: after what was found (the page opens on finds, not on absence), its Track
-              select right beside what it changes. */}
+          {/* Owned is a snapshot of now: not for a past season. */}
+          {range.until === null && <RuneStash track={trackRune} onTrack={setTrackRune} />}
+          {/* The tracked rune right under the runes it picks from (a rune's name there sets it too). */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <label className={`${input} flex items-center gap-2`}>
             <span className="text-muted">Track</span>
@@ -452,7 +442,7 @@ export function ProgressView({ range, section, title }: { range: Range; section:
             // Nothing tracked yet: one sentence, not a row of dashes.
             <p className="text-sm text-muted">
               No {trackName}+ runes in this period yet
-              {droughtKills !== null && last ? ` · ${fmtCompact(droughtKills)} kills since the last ${last.drop.item.name.replace(' Rune', '')}` : ''}. Pick a
+              {droughtKills !== null && last ? ` · ${fmtCompact(droughtKills)} kills since the last ${currencyLabel(last.drop.item)}` : ''}. Pick a
               lower rune to follow those instead.
             </p>
           ) : (
@@ -461,16 +451,12 @@ export function ProgressView({ range, section, title }: { range: Range; section:
               { value: fmtNumber(trackedCount), label: `${markerLabel}s`, title: 'In this period' },
               { value: killsGained !== null && trackedCount ? fmtCompact(killsGained / trackedCount) : '–', label: `kills per ${trackName}+` },
               { value: mapsGained !== null && trackedCount ? (mapsGained / trackedCount).toFixed(1) : '–', label: `maps per ${trackName}+` },
-              {
-                value: droughtKills !== null ? fmtCompact(droughtKills) : '–',
-                label: `kills since the last ${last ? last.drop.item.name.replace(' Rune', '') : `${trackName}+`}`,
-                title: droughtMaps !== null ? `${fmtNumber(droughtMaps)} maps` : last ? 'No readings since' : 'None found yet',
-              },
             ]}
           />
           )}
           </div>
           <GapTable gaps={gapsInRange} droughtKills={droughtKills} droughtMaps={droughtMaps} trackName={trackName} />
+          <CurrencyTable drops={currencyFound} />
         </>
       )}
     </>
@@ -547,11 +533,11 @@ function GapTable({
                   <td className="px-3 py-1.5">
                     <span className="flex items-center gap-2">
                       <ItemIcon item={g.drop.item} box={24} />
-                      <span className="text-q-crafted">{g.drop.item.name}</span>
+                      <span className="text-q-crafted">{currencyLabel(g.drop.item)}</span>
                       {g.drop.quantity > 1 && <span className="text-muted">×{g.drop.quantity}</span>}
                     </span>
                   </td>
-                  <td className="px-3 py-1.5 text-muted tabular-nums">{fullFmt.format(g.t)}</td>
+                  <td className="px-3 py-1.5 text-muted">{fullFmt.format(g.t)}</td>
                   <td className={cell}>{g.kills !== null ? fmtNumber(g.kills) : dash}</td>
                   <td className={cell}>{g.maps !== null ? fmtNumber(g.maps) : dash}</td>
                 </tr>

@@ -122,13 +122,18 @@ export interface GrailFound {
   quality: 'Unique' | 'Set';
   name: string;
   found_at: string;
+  /** Marked as found by the player (a backfill), not a find the capture saw. */
   baseline: boolean;
-  /** The drop that was the new find (null when owned before tracking began). */
+  /** The drop that was the new find (null for a mark). */
   drop_id: number | null;
-  item: Drop['item'];
+  /** Null for a mark. */
+  item: Drop['item'] | null;
 }
 export const fetchGrail = async (range: Range = { since: null, until: null }): Promise<GrailFound[]> =>
   (await json<{ found: GrailFound[] }>(await fetch(`/api/grail?${rangeParams(range)}`))).found;
+
+export const markGrail = async (quality: GrailFound['quality'], name: string, found: boolean) =>
+  json(await fetch('/api/grail/mark', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ quality, name, found }) }));
 
 export interface Listing {
   id: string;
@@ -160,15 +165,17 @@ export interface ManualSale {
   note: string | null;
 }
 
-export async function addManualSale(items: ManualSale['items'], soldHr: number, note: string) {
+/** Records a new sale, or with `id` rewrites that one. */
+export async function saveManualSale(items: ManualSale['items'], soldHr: number, note: string, id?: string) {
   return json(
-    await fetch('/api/manual-sales', {
-      method: 'POST',
+    await fetch(id ? `/api/manual-sales/${id}` : '/api/manual-sales', {
+      method: id ? 'PUT' : 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ items, soldHr, note }),
     }),
   );
 }
+export const deleteListing = async (id: string) => json(await fetch(`/api/listings/${id}`, { method: 'DELETE' }));
 export const deleteManualSale = async (id: string) => json(await fetch(`/api/manual-sales/${id}`, { method: 'DELETE' }));
 
 export const fetchListings = async (): Promise<{

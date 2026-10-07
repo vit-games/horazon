@@ -382,7 +382,7 @@ function Pilot({ data, clock }: { data: Running; clock: number }) {
   const best = data.best?.seconds ?? null;
   const timeScale = Math.max(clock, best ?? 0, data.medianClear ?? 0) * 1.1 || 1;
   const sourceLabel =
-    data.totalSource === 'game' ? 'exact' : data.totalSource === 'map' ? `est. from ${data.historyRuns} run${data.historyRuns === 1 ? '' : 's'}` : data.totalSource === 'tier' ? `est. from tier ${data.run.tier} maps` : 'no estimate yet';
+    data.totalSource === 'game' ? 'exact' : data.totalSource === 'map' ? `est. from ${data.historyRuns} run${data.historyRuns === 1 ? '' : 's'}` : data.totalSource === 'tier' ? `est. from ${data.run.tier ? `tier ${data.run.tier}` : 'unique'} maps` : 'no estimate yet';
 
   return (
     <div className="ov-slab ov-pad flex w-[360px] flex-col gap-2 font-num text-[15px] text-text ov-ink">

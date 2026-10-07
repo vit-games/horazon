@@ -236,13 +236,13 @@ export default function App() {
       >
         <Rune name={t.key} active={active} />
         {t.label}
-        {t.key === 'trade' && review.pending.length > 0 && (
+        {t.key === 'trade' && review.toReview.length > 0 && (
           <span
             className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 font-num text-xs leading-none font-bold text-bg"
-            title={`${review.pending.length} new drop${review.pending.length === 1 ? '' : 's'} to list or stash`}
-            aria-label={`, ${review.pending.length} to review`}
+            title={`${review.toReview.length} to review: list or stash`}
+            aria-label={`, ${review.toReview.length} to review`}
           >
-            {review.pending.length}
+            {review.toReview.length}
           </span>
         )}
         <kbd className="ml-auto hidden font-num text-xs font-semibold text-faint md:inline">{i + 1}</kbd>

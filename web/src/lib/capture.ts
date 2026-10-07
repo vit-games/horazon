@@ -239,6 +239,14 @@ type Named = { id?: number; base: string };
 const bases = gameData.bases as Record<string, { name: string | null; type: string | null }>;
 const uniqueById = new Map(Object.entries(gameData.uniques as Record<string, Named>).map(([name, u]) => [u.id, { name, base: u.base }]));
 const setById = new Map(Object.entries(gameData.sets as Record<string, Named>).map(([name, s]) => [s.id, { name, base: s.base }]));
+/** Base code -> the one unique/set on it, for bases with a single one (each Rainbow Facet is one site row). */
+const onlyOnBase = (table: Record<string, Named>) => {
+  const counts = new Map<string, number>();
+  for (const e of Object.values(table)) counts.set(e.base, (counts.get(e.base) ?? 0) + 1);
+  return new Map(Object.entries(table).filter(([, e]) => counts.get(e.base) === 1).map(([name, e]) => [e.base, name]));
+};
+const uniqueOnBase = onlyOnBase(gameData.uniques as Record<string, Named>);
+const setOnBase = onlyOnBase(gameData.sets as Record<string, Named>);
 
 export const baseName = (code: string) => bases[code]?.name ?? code;
 
@@ -290,7 +298,7 @@ export function itemName(code: string, quality: string | null, uid: number | nul
     const hit = table.get(id);
     if (hit && hit.base === code) return hit.name;
   }
-  return null;
+  return (quality === 'unique' ? uniqueOnBase : setOnBase).get(code) ?? null;
 }
 
 /** Display name of a captured item or run map (unique maps have their own names). */

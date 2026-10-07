@@ -137,35 +137,6 @@ main:focus-visible {
   box-shadow: inset 0 1px 0 rgb(226 222 210 / 0.06), 0 1px 0 rgb(0 0 0 / 0.6), 0 8px 24px -12px rgb(0 0 0 / 0.7);
 }
 
-/* The portal (the O of the wordmark, and the status light): a ring that turns while capture is live. */
-@keyframes portal-turn {
-  to { transform: rotate(360deg); }
-}
-@keyframes portal-breathe {
-  0%, 100% { opacity: 0.75; }
-  50% { opacity: 1; }
-}
-.portal-swirl {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.portal[data-state='live'] .portal-swirl {
-  animation: portal-turn 9s linear infinite;
-}
-.portal[data-state='live'] .portal-swirl.reverse {
-  animation-duration: 14s;
-  animation-direction: reverse;
-}
-.portal[data-state='live'] .portal-core {
-  animation: portal-breathe 3.2s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .portal[data-state='live'] .portal-swirl,
-  .portal[data-state='live'] .portal-core {
-    animation: none;
-  }
-}
-
 /* Numbers in tables and tiles line up. */
 .tabular-nums,
 td,

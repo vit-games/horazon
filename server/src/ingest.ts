@@ -55,11 +55,30 @@ interface Snapshot {
   raw: unknown;
 }
 
-let status: { running: boolean; lastCycle: Date | null; mode: { ladder: boolean; hardcore: boolean } } = {
-  running: false,
-  lastCycle: null,
-  mode: { ladder: true, hardcore: false },
+let status: { running: boolean; lastCycle: Date | null } = { running: false, lastCycle: null };
+
+/**
+ * PD2 keeps a shared stash per mode. Each mode an enabled character plays in is its own source:
+ * `stash:acct` (ladder softcore, the usual one) and `stash:acct:nonladder`, `:hardcore` or
+ * `:nonladder-hardcore`, so a ladder and a non-ladder character never swap one snapshot for the other.
+ */
+type Mode = { ladder: boolean; hardcore: boolean };
+const LADDER_SOFTCORE: Mode = { ladder: true, hardcore: false };
+const modeSuffix = ({ ladder, hardcore }: Mode) =>
+  ladder && !hardcore ? '' : `:${[ladder ? '' : 'nonladder', hardcore ? 'hardcore' : ''].filter(Boolean).join('-')}`;
+const modeOfKey = (key: string): Mode => {
+  const suffix = key.split(':')[2] ?? '';
+  return { ladder: !suffix.includes('nonladder'), hardcore: suffix.includes('hardcore') };
 };
+
+/** The mode of the shared stash holding `itemId` (for listing it), null when no stash holds it. */
+export async function stashModeOf(itemId: number): Promise<Mode | null> {
+  const { rows } = await pool.query<{ key: string; snapshot: { raw?: { items?: ApiItem[] } } | null }>(
+    "SELECT key, snapshot FROM sources WHERE key LIKE 'stash:%'",
+  );
+  const hit = rows.find((r) => r.snapshot?.raw?.items?.some((i) => i.id === itemId));
+  return hit ? modeOfKey(hit.key) : null;
+}
 export const ingestStatus = () => status;
 
 /** "r30s" (PD2 rune stack) -> "r30"; null for anything that isn't a tracked stackable. */
@@ -206,8 +225,6 @@ async function captureActive(): Promise<boolean> {
 /** Record ids for one source; returns number of new drops. */
 async function diffIds(snap: Snapshot, baseline: boolean, attributeTo: string | null, items = [...snap.items, ...socketedChildren(snap.items)]): Promise<number> {
   const withIds = items.filter(isTrackedUnique);
-  // Jewels sitting in sockets are tracked for drops but aren't grail "gear".
-  const inSockets = new Set(socketedChildren(snap.items).map((i) => i.id));
   const ids = withIds.map((i) => i.id);
   const { rows } = await pool.query<{ item_id: string }>('SELECT item_id FROM seen_items WHERE item_id = ANY($1::bigint[])', [ids]);
   const seen = new Set(rows.map((r) => Number(r.item_id)));
@@ -221,14 +238,10 @@ async function diffIds(snap: Snapshot, baseline: boolean, attributeTo: string | 
     if (!baseline && item.is_identified === false) continue;
     seen.add(item.id);
     await pool.query('INSERT INTO seen_items (item_id, source) VALUES ($1, $2) ON CONFLICT DO NOTHING', [item.id, snap.key]);
-    if (baseline) {
-      if ((item.quality?.name === 'Unique' || item.quality?.name === 'Set') && !inSockets.has(item.id)) {
-        await pool.query(
-          'INSERT INTO owned_baseline (item_id, name, quality, item) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
-          [item.id, item.name, item.quality.name, item],
-        );
-      }
-    } else if (await matchCaptureDrop(item)) {
+    // Owned when tracking starts: only remembered as seen. It doesn't count for the grail; the
+    // player marks their earlier finds on the Grail tab.
+    if (baseline) continue;
+    if (await matchCaptureDrop(item)) {
       drops++;
     } else if (!captured) {
       await insertDrop(snap.savedAt ?? new Date(), snap.key.split(':')[0], snap.character ?? attributeTo, item);
@@ -348,35 +361,40 @@ export async function pollOnce() {
     const settings = await getSettings();
     const enabled = Object.entries(settings.characters).filter(([, on]) => on).map(([name]) => name);
     const activeKeys = new Set(enabled.map((c) => `character:${c}`));
-    if (settings.token) activeKeys.add(`stash:${settings.account ?? 'pending'}`);
+    const stashKey = settings.token ? `stash:${settings.account ?? 'pending'}` : null;
 
     // Sources that were switched off drop out of the totals; re-enabling takes a fresh baseline.
-    await pool.query('DELETE FROM sources WHERE NOT (key = ANY($1::text[]))', [[...activeKeys]]);
+    // The account's stashes of every mode stay (a mode not played lately still holds its items).
+    await pool.query(`DELETE FROM sources WHERE NOT (key = ANY($1::text[]) OR key = $2 OR key LIKE $2 || ':%')`, [[...activeKeys], stashKey]);
     const { rows: known } = await pool.query<{ key: string; baseline_at: Date | null; game_saved_at: Date | null; snapshot: Snapshot | null }>(
       'SELECT key, baseline_at, game_saved_at, snapshot FROM sources',
     );
     const byKey = new Map(known.map((r) => [r.key, r]));
 
     const fresh: Snapshot[] = [];
+    const modes = new Map<string, Mode>();
     for (const name of enabled) {
       const key = `character:${name}`;
       try {
         const res = await fetchCharacter(name);
-        status.mode = { ladder: res.character.status.is_ladder, hardcore: res.character.status.is_hardcore };
+        const mode = { ladder: res.character.status.is_ladder, hardcore: res.character.status.is_hardcore };
+        modes.set(modeSuffix(mode), mode);
         fresh.push(characterSnapshot(name, res));
       } catch (err) {
         const msg = err instanceof ApiError && err.status === 404 ? 'Character not found' : String((err as Error).message ?? err);
         await saveSource(key, { error: msg });
       }
     }
-    if (settings.token) {
-      let key = `stash:${settings.account ?? 'pending'}`;
+    if (!modes.size) modes.set('', LADDER_SOFTCORE);
+    for (const [suffix, mode] of settings.token ? modes : []) {
+      const current = await getSettings();
+      let key = `stash:${current.account ?? 'pending'}${suffix}`;
       try {
-        const { stash: res, account, refreshedToken } = await fetchStash(settings.account, settings.token, status.mode.ladder, status.mode.hardcore);
+        const { stash: res, account, refreshedToken } = await fetchStash(current.account, current.token!, mode.ladder, mode.hardcore);
         // The session login tells us the account name and may re-issue the token.
-        if ((account && account !== settings.account) || refreshedToken) {
+        if ((account && account !== current.account) || refreshedToken) {
           await updateSettings({ ...(account ? { account } : {}), ...(refreshedToken ? { token: refreshedToken } : {}) });
-          if (account) key = `stash:${account}`;
+          if (account) key = `stash:${account}${suffix}`;
         }
         const stacks = countStacks(res.items ?? []);
         for (const [n, count] of Object.entries(res.currency?.runes ?? {})) {
@@ -462,14 +480,15 @@ export async function pollOnce() {
 
 /** Current loose rune/gem holdings across all sources (socketed runes are spent, not owned). */
 /** Ids of every item in the latest snapshot of each source (stash, characters), socketed ones too. */
-export async function heldItemIds(): Promise<Set<string>> {
+/** Every item id held in the last synced stashes and characters, with where it is now. */
+export async function heldItems(): Promise<Map<string, unknown>> {
   const { rows } = await pool.query<{ snapshot: { raw?: { items?: ApiItem[]; mercenary?: { items?: ApiItem[] } } } | null }>('SELECT snapshot FROM sources');
-  const ids = new Set<string>();
+  const held = new Map<string, unknown>();
   for (const { snapshot } of rows) {
     const items = [...(snapshot?.raw?.items ?? []), ...(snapshot?.raw?.mercenary?.items ?? [])];
-    for (const i of [...items, ...socketedChildren(items)]) if (i.id) ids.add(String(i.id));
+    for (const i of [...items, ...socketedChildren(items)]) if (i.id) held.set(String(i.id), i.location ?? null);
   }
-  return ids;
+  return held;
 }
 
 export async function holdings(): Promise<Record<string, number>> {

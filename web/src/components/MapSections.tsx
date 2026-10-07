@@ -1253,7 +1253,7 @@ function RunRow({
           )}
           {run.boss && bossSkipped(run) && (
             <span className="flex items-center gap-1 text-muted" title={`${run.boss} did not die in this run`}>
-              <EventIcon kind="boss" className="text-muted" title={run.boss} />
+              <EventIcon kind="boss" className="opacity-50 grayscale" title={run.boss} />
               <span className="text-xs">skipped</span>
             </span>
           )}

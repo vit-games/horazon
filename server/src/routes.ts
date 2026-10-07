@@ -2,11 +2,13 @@ import type { FastifyInstance } from 'fastify';
 import { lookUpMissing } from './characters.js';
 import { pool } from './db.js';
 import { notify } from './events.js';
-import { heldItemIds, holdings, ingestStatus, pollOnce } from './ingest.js';
+import { heldItems, holdings, ingestStatus, pollOnce } from './ingest.js';
 import {
   addManualSale,
   closeListing,
   deleteManualSale,
+  deleteListingRecord,
+  updateManualSale,
   getManualSales,
   getListings,
   listingSyncStatus,
@@ -103,7 +105,7 @@ export function registerRoutes(app: FastifyInstance) {
   // be listed for sale): magic, rare and crafted finds, and stashed drops of any kind - the Trade tab's
   // lists. A stashed item you sold or dropped in game leaves with the next sync.
   app.get('/api/stash-finds', async () => {
-    const held = await heldItemIds();
+    const held = await heldItems();
     const { rows } = await pool.query(
       `SELECT id, found_at, character, quantity, item, source, ignored, kept, original_item, item_updated_at, stashed_at, pin_slot, pinned_at,
               game_item_id::text AS game_item_id
@@ -112,7 +114,12 @@ export function registerRoutes(app: FastifyInstance) {
           AND NOT ignored AND game_item_id IS NOT NULL
         ORDER BY found_at DESC`,
     );
-    return { drops: rows.filter((r) => held.has(r.game_item_id)).map(({ game_item_id: _, ...r }) => r) };
+    // The drop's item keeps where it was when last changed; moving it doesn't, so take today's location.
+    return {
+      drops: rows
+        .filter((r) => held.has(r.game_item_id))
+        .map(({ game_item_id, ...r }) => ({ ...r, item: { ...r.item, location: held.get(game_item_id) ?? r.item.location } })),
+    };
   });
 
   app.patch<{ Params: { id: string }; Body: { ignored?: boolean; kept?: boolean; stashed?: boolean; pinSlot?: number | null; unpin?: number[] } }>('/api/drops/:id', async (req, reply) => {
@@ -157,22 +164,32 @@ export function registerRoutes(app: FastifyInstance) {
     return { character: character ?? null, characters, samples };
   });
 
-  // Grail: first time each unique/set was found within the range - owned when tracking
-  // began (baseline) wins over later drops. `drop_id` marks the drop that was the new find.
+  // Grail: first time each unique/set was found within the range - only finds the capture saw in
+  // a game (a stash pull doesn't decide), plus the player's own marks (`baseline`), which win over
+  // later drops. `drop_id` marks the drop that was the new find.
   app.get<{ Querystring: RangeQuery }>('/api/grail', async (req) => {
     const { rows } = await pool.query(
       `SELECT DISTINCT ON (quality, name) quality, name, found_at, baseline, drop_id, item
          FROM (SELECT quality, name, found_at, false AS baseline, id AS drop_id, COALESCE(original_item, item) AS item FROM drops
-                WHERE quality IN ('Unique', 'Set') AND (NOT ignored OR discarded)
+                WHERE quality IN ('Unique', 'Set') AND source = 'capture' AND (NOT ignored OR discarded)
                   -- A season's grail is the ladder characters'.
                   AND ($1::timestamptz IS NULL OR character IS NULL OR character NOT IN ${NON_LADDER_CHARACTERS})
                UNION ALL
-               SELECT quality, name, recorded_at, true, NULL, item FROM owned_baseline) f
+               SELECT quality, name, marked_at, true, NULL, NULL FROM grail_marks) f
         WHERE ($1::timestamptz IS NULL OR found_at >= $1) AND ($2::timestamptz IS NULL OR found_at < $2)
         ORDER BY quality, name, baseline DESC, found_at`,
       [req.query.since ?? null, req.query.until ?? null],
     );
     return { found: rows };
+  });
+
+  app.put<{ Body: { quality: string; name: string; found: boolean } }>('/api/grail/mark', async (req, reply) => {
+    const { quality, name, found } = req.body ?? {};
+    if ((quality !== 'Unique' && quality !== 'Set') || typeof name !== 'string' || !name) return reply.code(400).send({ error: 'bad item' });
+    if (found) await pool.query('INSERT INTO grail_marks (quality, name) VALUES ($1, $2) ON CONFLICT DO NOTHING', [quality, name]);
+    else await pool.query('DELETE FROM grail_marks WHERE quality = $1 AND name = $2', [quality, name]);
+    notify('drops');
+    return { ok: true };
   });
 
   app.get('/api/settings', async () => {
@@ -206,8 +223,8 @@ export function registerRoutes(app: FastifyInstance) {
     const { rows } = await pool.query(
       'SELECT key, baseline_at, game_saved_at, last_poll_at, last_error FROM sources ORDER BY key',
     );
-    const { lastCycle, running, mode } = ingestStatus();
-    return { sources: rows, lastCycle, running, mode };
+    const { lastCycle, running } = ingestStatus();
+    return { sources: rows, lastCycle, running };
   });
 
   app.post('/api/poll', async () => {
@@ -229,13 +246,25 @@ export function registerRoutes(app: FastifyInstance) {
 
   app.get('/api/listings', async () => ({ listings: await getListings(), manualSales: await getManualSales(), sync: listingSyncStatus() }));
 
-  app.post<{ Body: { items: { code: string; qty: number }[]; soldHr: number; note?: string } }>('/api/manual-sales', async (req, reply) => {
-    const { soldHr, note } = req.body ?? {};
-    const items = (req.body?.items ?? []).filter((i) => typeof i.code === 'string' && Number.isInteger(i.qty) && i.qty > 0);
-    if ((!items.length && !note?.trim()) || !(typeof soldHr === 'number' && soldHr >= 0)) {
-      return reply.code(400).send({ error: 'needs currencies or a description, and an HR price' });
-    }
-    await addManualSale(items.map(({ code, qty }) => ({ code, qty })), soldHr, note?.trim() || null);
+  type ManualSaleBody = { Body: { items: { code: string; qty: number }[]; soldHr: number; note?: string } };
+  // Shared by add and edit: null when the body is unusable.
+  const manualSaleArgs = (body: ManualSaleBody['Body'] | undefined) => {
+    const { soldHr, note } = body ?? {};
+    const items = (body?.items ?? []).filter((i) => typeof i.code === 'string' && Number.isInteger(i.qty) && i.qty > 0);
+    if ((!items.length && !note?.trim()) || !(typeof soldHr === 'number' && soldHr >= 0)) return null;
+    return [items.map(({ code, qty }) => ({ code, qty })), soldHr, note?.trim() || null] as const;
+  };
+  const badManualSale = { error: 'needs currencies or a description, and an HR price' };
+  app.post<ManualSaleBody>('/api/manual-sales', async (req, reply) => {
+    const args = manualSaleArgs(req.body);
+    if (!args) return reply.code(400).send(badManualSale);
+    await addManualSale(...args);
+    return { ok: true };
+  });
+  app.put<ManualSaleBody & { Params: { id: string } }>('/api/manual-sales/:id', async (req, reply) => {
+    const args = manualSaleArgs(req.body);
+    if (!args) return reply.code(400).send(badManualSale);
+    await updateManualSale(req.params.id, ...args);
     return { ok: true };
   });
   app.delete<{ Params: { id: string } }>('/api/manual-sales/:id', async (req) => {
@@ -270,6 +299,11 @@ export function registerRoutes(app: FastifyInstance) {
       return { ok: true };
     },
   );
+
+  app.delete<{ Params: { id: string } }>('/api/listings/:id', async (req) => {
+    await deleteListingRecord(req.params.id);
+    return { ok: true };
+  });
 
   app.get('/api/holdings', async () => ({ holdings: await holdings() }));
   app.get('/api/seasons', async () => ({ seasons: await getSeasons() }));

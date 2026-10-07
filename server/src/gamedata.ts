@@ -55,8 +55,24 @@ export function itemImageNames(): string[] {
 const byId = (table: Record<string, Named>) => new Map(Object.entries(table).map(([name, e]) => [e.id, { name, base: e.base }]));
 const uniqueById = byId(data.uniques);
 const setById = byId(data.sets);
+/** Base code -> the one unique/set on it, for bases with a single one. */
+const onlyOnBase = (table: Record<string, Named>) => {
+  const counts = new Map<string, number>();
+  for (const e of Object.values(table)) counts.set(e.base, (counts.get(e.base) ?? 0) + 1);
+  return new Map(Object.entries(table).filter(([, e]) => counts.get(e.base) === 1).map(([name, e]) => [e.base, name]));
+};
+const uniqueOnBase = onlyOnBase(data.uniques);
+const setOnBase = onlyOnBase(data.sets);
 
 export const baseInfo = (code: string): Base | undefined => data.bases[code];
+
+/** Unique maps each have their own base (t51-t58), named only "Map": base code -> the unique's name. */
+const uniqueMaps = new Map(
+  Object.entries(data.uniques)
+    .filter(([, u]) => data.bases[u.base]?.type === 'Map T5')
+    .map(([name, u]) => [u.base, name]),
+);
+export const uniqueMapName = (code: string) => uniqueMaps.get(code) ?? null;
 
 /** Zone names in PD2's wording that differ from levels.txt. */
 const AREA_ALIASES: Record<string, number[]> = {
@@ -82,7 +98,7 @@ export function areasNamed(name: string): number[] {
 /**
  * Name of an identified unique/set from its in-game index. The site's ids run one
  * ahead of the game's for part of the table, so neighbours are checked and the one
- * whose base matches the item wins.
+ * whose base matches the item wins, else the only unique/set on that base.
  */
 export function setOrUniqueName(code: string, quality: string | undefined, uid: number | undefined): string | null {
   if (uid === undefined || (quality !== 'unique' && quality !== 'set')) return null;
@@ -91,5 +107,7 @@ export function setOrUniqueName(code: string, quality: string | undefined, uid: 
     const hit = table.get(id);
     if (hit && hit.base === code) return hit.name;
   }
-  return null;
+  // The site lists some items once that the game has several rows for (each Rainbow Facet): the
+  // only one on its base is it.
+  return (quality === 'unique' ? uniqueOnBase : setOnBase).get(code) ?? null;
 }

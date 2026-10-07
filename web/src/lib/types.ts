@@ -43,6 +43,8 @@ export interface Item {
   damage?: { one_handed?: Partial<DamageRange>; two_handed?: Partial<DamageRange>; missile?: Partial<DamageRange> };
   requirements?: { level?: number; strength?: number; dexterity?: number };
   modifiers: Modifier[];
+  /** Where the stash API saw it, e.g. storage 'Shared Stash'. */
+  location?: { storage?: string };
 }
 
 export interface Drop {

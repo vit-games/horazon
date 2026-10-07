@@ -7,6 +7,60 @@ date and download links), and `scripts/release.sh` refuses a version without one
 Versions follow the PD2 seasons: major for a new season (with its feature upgrades), minor for
 each new feature, patch for fixes (see the README's Releasing section).
 
+## v0.15.0
+
+#### NEW
+
+- **Listing notes write themselves** - Sell… fills the note buyers see with your price and the item's stats, as
+  torch listings read ("0.25 HR (+16 AR / 14-34 Fire)"): every stat of a magic, rare or crafted item, only the rolls
+  of a unique or set; prices under 0.2 HR read in Worldstone Shards (0.05 HR is "5 WSS"). Type in it to write
+  your own. Quick prices (0.05 to 2 HR) sit next to the price box.
+- **Stats on Trade rows** - each item under To review and Stashed shows the same short stats, so jewels and charms
+  can be told apart without hovering.
+- **Sell… only where it can work** - stacked items and items not in your shared stash can't be listed, and the
+  button now says so instead of failing after you typed a price.
+- **Edit and Delete on every sale** - each sale in the history now has both: currency and service sales can be
+  edited instead of deleted and entered again, and an item sale recorded by mistake can be deleted.
+
+- **Treacherous maps** - a map with a player ear used on it gets its own mark (an ear) next to the corrupted,
+  Heroic, Catalyzed and Fortified marks.
+
+- **The grail counts what you find in game** - a unique or set joins the grail when you find it during a game, no
+  longer because a stash sync saw it (traded or muled items counted too). Earlier finds can be marked by hand: hover
+  an item on the Grail tab and pick Mark found. Items that counted as "owned at start" need marking again.
+
+- **Your runes as a stash page on Drops → Currency** - the two rune strips are now one grid of all 33 runes, El to
+  Zod as the game's rune stash lays them out, each with the count you own now (every character and the shared
+  stash; runes you have none of stay empty). Pick a rune to track it and higher; the rune tracker and the gaps
+  between finds follow right under it. Currency comes last, as one narrower table of what you found and when (the Horadric items joined it;
+  the per-map rate is gone, as most currency doesn't come from maps).
+
+#### FIXES
+
+- **Stashed lists only what's in a stash** - an item you took onto a character (a charm you're using) left a greyed-out
+  Sell… behind; it now leaves the list until it's back in a stash. Sell… also goes by where the item is now, not
+  where it was found.
+- **The Trade badge matches To review** - the rail counted only new valuable drops while To review also held your
+  magic, rare and crafted stash finds; both now show the same number.
+- **Confirming a sale asks only for the final price** - it starts at your asking price, so a sale at that price is
+  one Enter; the "what you got" box is gone.
+- **No comma decimals when listing** - the Sell… price box took "0,1" as 0.1 HR, so a slip between , and . could post an
+  item far too cheap; it now asks for a dot.
+- **Skill bonuses read by their kind** - "+1 to Summoning Skills (Necromancer Only)" is "+1 Summoning", a single
+  skill "+3 Critical Strike"; damage, thorns, absorb and max-resist stats got proper short names too.
+
+- **The shared stash of the mode you play** - with a ladder and a non-ladder character both checked, the stash was
+  read for whichever was checked last, so ladder stash finds were missing from Trade (and Sell… posted in that
+  mode). Each mode's shared stash is now read on its own, and an item is listed in the mode of the stash it's in.
+- **Rainbow Facets named** - a facet identified in game was recorded as an unidentified Jewel (with its stats) and
+  missed the grail; facets are named now, and the ones already recorded are fixed when you update.
+
+- **Unique maps named on the overlays** - the run tracker and Moments showed a unique map as "T5 Map"; they now
+  show its name (Zhar's Sanctum...), without a tier, as the rest of the app does.
+
+- **Sync now on Trade checks your stash too** - it synced only your trade-site listings, so items you sold or moved
+  in game stayed under Stashed until the next item check; it now does both.
+
 ## v0.14.0
 
 The first public release. Horazon reads the game's network traffic while you play (nothing injected, nothing read

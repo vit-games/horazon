@@ -18,10 +18,11 @@ import { field as input, btn as button, btnDanger as danger, subnav } from '../l
 
 const timeFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 const fmt = (t: string | null) => (t ? timeFmt.format(new Date(t)) : '—');
-/** `character:Vitsin` -> "Vitsin's gear", `stash:acct` -> "Shared stash (acct)". */
+/** `character:Vitsin` -> "Vitsin's gear", `stash:acct:nonladder` -> "Shared stash, non-ladder (acct)". */
 const sourceName = (key: string) => {
-  const [kind, name] = key.split(':');
-  return kind === 'character' ? `${name}'s gear` : kind === 'stash' ? `Shared stash${name && name !== 'pending' ? ` (${name})` : ''}` : key;
+  const [kind, name, mode] = key.split(':');
+  const label = mode ? `, ${mode.replace('nonladder', 'non-ladder').replace('-', ' ')}` : '';
+  return kind === 'character' ? `${name}'s gear` : kind === 'stash' ? `Shared stash${label}${name && name !== 'pending' ? ` (${name})` : ''}` : key;
 };
 
 export function SettingsView() {

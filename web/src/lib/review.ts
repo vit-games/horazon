@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchDrops, fetchListings } from './api';
+import { fetchDrops, fetchListings, fetchStashFinds } from './api';
 import { useChanges } from './live';
 import type { Drop } from './types';
 
@@ -10,6 +10,10 @@ import type { Drop } from './types';
  */
 export interface TradeReview {
   pending: { drop: Drop }[];
+  /** Synced items still in your stash or on a character (the Trade tab's To review and Stashed source). */
+  finds: Drop[];
+  /** The To review list, newest first: pending drops plus held finds not listed or stashed. Its length is the rail badge. */
+  toReview: Drop[];
   /** Every (non-ignored) drop, all time - shared so other trade views don't refetch. */
   drops: Drop[];
   sound: boolean;
@@ -70,17 +74,19 @@ export const BLUE_YELLOW = new Set(['Magic', 'Rare', 'Crafted']);
 export function useTradeReviewLoader(): TradeReview {
   const [sound, setSoundState] = useState(() => load(SOUND_KEY, true));
   const [drops, setDrops] = useState<Drop[]>([]);
+  const [finds, setFinds] = useState<Drop[]>([]);
   const [listed, setListed] = useState<Set<string>>(new Set());
-  const version = useChanges('drops', 'listings');
+  const version = useChanges('drops', 'sources', 'listings');
 
   useEffect(() => {
     let cancelled = false;
     fetchListings()
       .then(async ({ listings }) => {
-        const found = await fetchDrops({ since: null, until: null });
+        const [found, held] = await Promise.all([fetchDrops({ since: null, until: null }), fetchStashFinds()]);
         if (cancelled) return;
         setListed(listedDrops(listings));
         setDrops(found);
+        setFinds(held);
       })
       .catch(() => {});
     return () => {
@@ -96,6 +102,15 @@ export function useTradeReviewLoader(): TradeReview {
         .filter((d) => !BLUE_YELLOW.has(d.item.quality?.name ?? ''))
         .map((drop) => ({ drop })),
     [drops, listed],
+  );
+
+  // Newest first across both sources (they never overlap: pending leaves magic, rare and crafted out).
+  const toReview = useMemo(
+    () =>
+      [...pending.map((p) => p.drop), ...finds.filter((d) => !listed.has(String(d.id)) && !d.stashed_at)].sort((a, b) =>
+        b.found_at.localeCompare(a.found_at),
+      ),
+    [pending, finds, listed],
   );
 
   // Chime once per drop, ever: ids already notified are remembered across reloads.
@@ -115,6 +130,8 @@ export function useTradeReviewLoader(): TradeReview {
 
   return {
     pending,
+    finds,
+    toReview,
     drops,
     sound,
     setSound: (on) => {
@@ -124,5 +141,5 @@ export function useTradeReviewLoader(): TradeReview {
   };
 }
 
-export const TradeReviewContext = createContext<TradeReview>({ pending: [], drops: [], sound: true, setSound: () => {} });
+export const TradeReviewContext = createContext<TradeReview>({ pending: [], finds: [], toReview: [], drops: [], sound: true, setSound: () => {} });
 export const useTradeReview = () => useContext(TradeReviewContext);

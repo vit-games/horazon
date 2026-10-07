@@ -5,13 +5,14 @@ import { Earnings } from '../components/Earnings';
 import { ManualSaleForm } from '../components/ManualSaleForm';
 import { TradeCharts, manualSaleTitle } from '../components/TradeCharts';
 import { FloatingTooltip } from '../components/ItemTooltip';
-import { closeListing, deleteManualSale, fetchListings, fetchStashFinds, setDropStashed, syncListings, type Listing, type ManualSale, type Range } from '../lib/api';
+import { closeListing, deleteListing, deleteManualSale, fetchListings, pollNow, setDropStashed, syncListings, type Listing, type ManualSale, type Range } from '../lib/api';
 import { currencyItem } from '../lib/currencyCatalog';
 import { listedDrops, playChime, useTradeReview } from '../lib/review';
 import { useChanges } from '../lib/live';
 import { GROUPS, GROUP_LABEL, itemGroup, itemKind, nameColor, type Group } from '../lib/itemStyle';
 import { Summary } from '../components/Summary';
 import { fmtHr } from '../lib/values';
+import { listingStats } from '../lib/modShort';
 import type { Drop, Item } from '../lib/types';
 import { fieldSm as input, btnSm as button } from '../lib/ui';
 
@@ -102,12 +103,14 @@ export function TradeView({ range }: { range: Range }) {
           <button
             className={button}
             disabled={busy}
+            title="Sync your trade-site listings and check your stash and characters (what you stashed, sold or moved in game)"
             onClick={() => {
               setBusy(true);
-              syncListings().finally(() => setBusy(false));
+              // Both: the lists below come from the trade site and from your stash.
+              Promise.allSettled([syncListings(), pollNow()]).finally(() => setBusy(false));
             }}
           >
-            Sync now
+            {busy ? 'Syncing…' : 'Sync now'}
           </button>
           <button className={button} onClick={() => setAddingSale((a) => !a)}>
             Add manual sale
@@ -123,7 +126,7 @@ export function TradeView({ range }: { range: Range }) {
       />
       <TradeCharts listings={listings} manualSales={manualSales} range={range} />
 
-      {listings.length === 0 && !manualSales.length && !review.pending.length && (
+      {listings.length === 0 && !manualSales.length && !review.toReview.length && (
         <p className="py-16 text-center text-muted">
           No listings yet. Items you post on the PD2 trade site show up here (synced every 5 minutes by account name).
         </p>
@@ -170,8 +173,7 @@ function ReviewSection({
   unsoldAt: Map<string, string>;
   onHover: (at: { x: number; y: number } | null, item?: Item) => void;
 }) {
-  const { pending, sound, setSound } = useTradeReview();
-  const [finds, setFinds] = useState<Drop[]>([]);
+  const { toReview, finds, sound, setSound } = useTradeReview();
   const [selling, setSelling] = useState<string | null>(null);
   const [view, setView] = useState<'review' | 'stashed'>('review');
   const [kinds, setKinds] = useState<Group[]>(() => {
@@ -181,10 +183,6 @@ function ReviewSection({
       return [];
     }
   });
-  const version = useChanges('drops', 'sources', 'listings');
-  useEffect(() => {
-    fetchStashFinds().then(setFinds, () => {});
-  }, [version]);
   const pick = (next: Group[]) => {
     setKinds(next);
     try {
@@ -195,11 +193,17 @@ function ReviewSection({
   };
 
   const open = (d: Drop) => !listed.has(String(d.id));
-  // Newest first across both sources (they never overlap: the review leaves magic, rare and crafted out).
-  const toReview = [...pending.map((p) => p.drop), ...finds.filter((d) => open(d) && !d.stashed_at)].sort((a, b) => b.found_at.localeCompare(a.found_at));
-  // Stashed: only while you still hold it (stash-finds checks the synced stash and characters), so
-  // what you sold or dropped in game without recording a sale leaves on its own; last stashed first.
-  const stashed = finds.filter((d) => d.stashed_at && open(d)).sort((a, b) => b.stashed_at!.localeCompare(a.stashed_at!));
+  // The trade site only takes single items from the shared stash.
+  const unpostable = (d: Drop) =>
+    d.source === 'stack'
+      ? "Stacked items can't be listed - record the sale with Add manual sale"
+      : d.item.location?.storage && d.item.location.storage !== 'Shared Stash'
+        ? 'Move it to your shared stash to list it'
+        : null;
+  // Stashed: only while it's in a stash now (stash-finds gives today's location), so what you sold,
+  // dropped or took onto a character (a charm in use) leaves on its own; last stashed first.
+  const inStash = (d: Drop) => d.item.location?.storage?.includes('Stash') ?? false;
+  const stashed = finds.filter((d) => d.stashed_at && open(d) && inStash(d)).sort((a, b) => b.stashed_at!.localeCompare(a.stashed_at!));
   const all = view === 'review' ? toReview : stashed;
 
   const counts = Object.fromEntries(GROUPS.map((g) => [g, 0])) as Record<Group, number>;
@@ -279,12 +283,14 @@ function ReviewSection({
                     <ItemIcon item={d.item} box={44} />
                     <div className="min-w-0 flex-1">
                       <div className={`truncate text-[17px] font-semibold ${nameColor(d.item)}`}>{d.item.name}</div>
-                      <div className="truncate text-xs text-muted">{[itemKind(d.item), note(d), d.character].filter(Boolean).join(' · ')}</div>
+                      <div className="truncate text-xs text-muted">{[itemKind(d.item), listingStats(d.item), note(d), d.character].filter(Boolean).join(' · ')}</div>
                     </div>
                     <div className="flex shrink-0 justify-end gap-1.5 sm:w-[200px]">
-                      <button className={button} onClick={() => setSelling(selling === String(d.id) ? null : String(d.id))}>
-                        Sell…
-                      </button>
+                      <span title={unpostable(d) ?? undefined}>
+                        <button className={button} disabled={!!unpostable(d)} onClick={() => setSelling(selling === String(d.id) ? null : String(d.id))}>
+                          Sell…
+                        </button>
+                      </span>
                       {view === 'review' ? (
                         <button className={button} title="Keep it for now - it waits under Stashed, from where it can come back" onClick={() => setDropStashed(d.id, true).catch(() => {})}>
                           Stash
@@ -296,7 +302,7 @@ function ReviewSection({
                       )}
                     </div>
                   </div>
-                  {selling === String(d.id) && <SellForm dropId={d.id} onDone={() => setSelling(null)} />}
+                  {selling === String(d.id) && <SellForm dropId={d.id} item={d.item} onDone={() => setSelling(null)} />}
                 </li>
               ))}
             </ul>
@@ -308,29 +314,36 @@ function ReviewSection({
 }
 
 function ManualSaleRow({ sale: m }: { sale: ManualSale }) {
+  const [editing, setEditing] = useState(false);
   return (
-    <li className="flex items-center gap-3 border-b border-line/50 px-3 py-1.5 hover:bg-panel-hi">
-      <div className="flex w-11 shrink-0 flex-wrap items-center justify-center">
-        {m.items.length ? (
-          m.items.slice(0, 4).map((i) => <ItemIcon key={i.code} item={currencyItem(i.code)} box={m.items.length > 1 ? 22 : 44} />)
-        ) : (
-          <span className="text-xs text-muted">Service</span>
-        )}
+    <li className="flex flex-col border-b border-line/50 px-3 py-1.5 hover:bg-panel-hi">
+      <div className="flex items-center gap-3">
+        <div className="flex w-11 shrink-0 flex-wrap items-center justify-center">
+          {m.items.length ? (
+            m.items.slice(0, 4).map((i) => <ItemIcon key={i.code} item={currencyItem(i.code)} box={m.items.length > 1 ? 22 : 44} />)
+          ) : (
+            <span className="text-xs text-muted">Service</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          {/* Notes are the player's own words: they wrap rather than get cut off. */}
+          <div className="text-[17px] font-semibold [overflow-wrap:anywhere] text-text">{m.items.length ? manualSaleTitle(m) : m.note}</div>
+          <div className="text-xs [overflow-wrap:anywhere] text-muted">{[m.items.length ? m.note : null, `Sold ${fmt(m.sold_at)}`].filter(Boolean).join(' · ')}</div>
+        </div>
+        <div className="w-16 shrink-0 text-right text-sm sm:w-28 text-q-normal tabular-nums">{fmtHr(m.sold_hr)}</div>
+        <div className="flex shrink-0 justify-end gap-1.5 sm:w-[148px]">
+          <button className="rounded-sm px-2 py-1 text-xs text-faint hover:bg-line hover:text-text" onClick={() => setEditing(!editing)}>
+            Edit
+          </button>
+          <button
+            className="rounded-sm px-2 py-1 text-xs text-muted hover:bg-q-red/10 hover:text-q-red"
+            onClick={() => confirm(`Delete the sale "${m.items.length ? manualSaleTitle(m) : (m.note ?? 'Service')}" (${fmtHr(m.sold_hr)})?`) && void deleteManualSale(m.id).catch(() => {})}
+          >
+            Delete
+          </button>
+        </div>
       </div>
-      <div className="min-w-0 flex-1">
-        {/* Notes are the player's own words: they wrap rather than get cut off. */}
-        <div className="text-[17px] font-semibold [overflow-wrap:anywhere] text-text">{m.items.length ? manualSaleTitle(m) : m.note}</div>
-        <div className="text-xs [overflow-wrap:anywhere] text-muted">{[m.items.length ? m.note : null, `Sold ${fmt(m.sold_at)}`].filter(Boolean).join(' · ')}</div>
-      </div>
-      <div className="w-16 shrink-0 text-right text-sm sm:w-28 text-q-normal tabular-nums">{fmtHr(m.sold_hr)}</div>
-      <div className="flex shrink-0 justify-end sm:w-[148px]">
-        <button
-          className="rounded-sm px-2 py-1 text-xs text-muted hover:bg-q-red/10 hover:text-q-red"
-          onClick={() => confirm(`Delete the sale "${m.items.length ? manualSaleTitle(m) : (m.note ?? 'Service')}" (${fmtHr(m.sold_hr)})?`) && void deleteManualSale(m.id).catch(() => {})}
-        >
-          Delete
-        </button>
-      </div>
+      {editing && <ManualSaleForm sale={m} onDone={() => setEditing(false)} />}
     </li>
   );
 }
@@ -401,10 +414,18 @@ function ListingRow({ listing: l, onHover }: { listing: Listing; onHover: (at: {
             </>
           ) : (
             l.outcome === 'sold' && (
-              // Rarely needed, so kept out of the way.
-              <button className="rounded-sm px-2 py-1 text-xs text-faint hover:bg-line hover:text-text" onClick={() => toggle('sold')}>
-                Edit
-              </button>
+              // Rarely needed, so kept out of the way; the same pair as on manual sales.
+              <>
+                <button className="rounded-sm px-2 py-1 text-xs text-faint hover:bg-line hover:text-text" onClick={() => toggle('sold')}>
+                  Edit
+                </button>
+                <button
+                  className="rounded-sm px-2 py-1 text-xs text-muted hover:bg-q-red/10 hover:text-q-red"
+                  onClick={() => confirm(`Delete the sale "${l.item.name}" (${fmtHr(l.sold_hr!)})?`) && void deleteListing(l.id).catch(() => {})}
+                >
+                  Delete
+                </button>
+              </>
             )
           )}
         </div>
@@ -450,8 +471,8 @@ function UnsoldForm({ listing: l, onDone }: { listing: Listing; onDone: () => vo
 
 /** The final price is always typed and approved by hand: deals get renegotiated outside the site. */
 function SoldForm({ listing: l, onDone }: { listing: Listing; onDone: () => void }) {
-  const [hr, setHr] = useState(l.sold_hr !== null ? String(l.sold_hr) : '');
-  const [deal, setDeal] = useState(l.sold_price ?? '');
+  // Sold at the asking price unless you change it.
+  const [hr, setHr] = useState(String(l.sold_hr ?? l.asking_hr ?? ''));
   const onSite = !l.removed_at;
   const [delist, setDelist] = useState(onSite);
   const [busy, setBusy] = useState(false);
@@ -467,7 +488,7 @@ function SoldForm({ listing: l, onDone }: { listing: Listing; onDone: () => void
         if (!valid) return;
         setBusy(true);
         setError(null);
-        closeListing(l.id, 'sold', value, deal, onSite && delist).then(onDone, (err: Error) => {
+        closeListing(l.id, 'sold', value, l.sold_price ?? '', onSite && delist).then(onDone, (err: Error) => {
           setError(err.message);
           setBusy(false);
         });
@@ -475,15 +496,9 @@ function SoldForm({ listing: l, onDone }: { listing: Listing; onDone: () => void
     >
       <label className="flex items-center gap-1.5 text-muted">
         Final price
-        <input className={`${input} w-24 text-text`} inputMode="decimal" autoFocus placeholder="0.5" value={hr} onChange={(e) => setHr(e.target.value)} />
+        <input className={`${input} w-24 text-text`} inputMode="decimal" autoFocus placeholder="0.5" onFocus={(e) => e.target.select()} value={hr} onChange={(e) => setHr(e.target.value)} />
         HR
       </label>
-      <input
-        className={`${input} min-w-0 flex-1`}
-        placeholder={l.asking ? `What you got, e.g. ${l.asking}` : 'What you got (optional)'}
-        value={deal}
-        onChange={(e) => setDeal(e.target.value)}
-      />
       {onSite && (
         <label className="flex items-center gap-1.5 text-xs text-muted">
           <input type="checkbox" className="accent-accent" checked={delist} onChange={(e) => setDelist(e.target.checked)} />

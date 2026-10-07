@@ -77,7 +77,8 @@ kbd { font: 600 0.92em var(--num); color: var(--text); }
   font: 800 22px/1 var(--display); letter-spacing: 0.06em; color: var(--text); text-decoration: none;
 }
 .wordmark:hover { color: var(--text); }
-.wordmark img { width: 26px; height: 34px; margin: -8px 1px; }
+.wordmark picture { display: inline-flex; }
+.wordmark img { width: 20px; height: 34px; margin: -8px 2px; }
 .top nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; }
 .top nav a { font-weight: 600; font-size: 15px; color: var(--muted); text-decoration: none; padding: 6px 0; border-bottom: 2px solid transparent; }
 .top nav a:hover { color: var(--text); }

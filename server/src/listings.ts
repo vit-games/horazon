@@ -6,7 +6,7 @@
 import type { PoolClient } from 'pg';
 import { pool } from './db.js';
 import { notify } from './events.js';
-import { ingestStatus } from './ingest.js';
+import { stashModeOf } from './ingest.js';
 import { createListing, deleteListing, type ApiItem } from './pd2api.js';
 import { getSettings } from './settings.js';
 
@@ -102,7 +102,9 @@ export async function postDrop(dropId: number, hrPrice: number, note: string) {
   const { rows } = await pool.query<{ item_id: number | null }>(`SELECT game_item_id AS item_id FROM drops WHERE id = $1`, [dropId]);
   const itemId = rows[0]?.item_id;
   if (!itemId) throw new Error('This drop has no item id (stacked currency cannot be listed)');
-  const { ladder, hardcore } = ingestStatus().mode;
+  const mode = await stashModeOf(Number(itemId));
+  if (!mode) throw new Error('This item is not in your shared stash (only stash items can be listed)');
+  const { ladder, hardcore } = mode;
   const created = (await createListing(account, token, { itemId: Number(itemId), hrPrice, note, ladder, hardcore })) as unknown as MarketListing;
   await saveListing(pool, { ...created, created_at: created.created_at ?? new Date().toISOString() }, dropId);
   notify('listings');
@@ -135,6 +137,12 @@ export async function closeListing(id: string, outcome: 'sold' | 'unsold' | null
   notify('listings');
 }
 
+/** Forget a listing (a sale recorded by mistake). One still on the trade site comes back on the next sync. */
+export async function deleteListingRecord(id: string) {
+  await pool.query('DELETE FROM listings WHERE id = $1', [id]);
+  notify('listings');
+}
+
 export async function getManualSales() {
   const { rows } = await pool.query(
     'SELECT id, sold_at, items, sold_hr::float8 AS sold_hr, note FROM manual_sales ORDER BY sold_at DESC',
@@ -144,6 +152,11 @@ export async function getManualSales() {
 
 export async function addManualSale(items: { code: string; qty: number }[], soldHr: number, note: string | null) {
   await pool.query('INSERT INTO manual_sales (items, sold_hr, note) VALUES ($1, $2, $3)', [JSON.stringify(items), soldHr, note]);
+  notify('listings');
+}
+
+export async function updateManualSale(id: string, items: { code: string; qty: number }[], soldHr: number, note: string | null) {
+  await pool.query('UPDATE manual_sales SET items = $2, sold_hr = $3, note = $4 WHERE id = $1', [id, JSON.stringify(items), soldHr, note]);
   notify('listings');
 }
 

@@ -137,11 +137,12 @@ export function SymbolKey() {
                 <Row mark={<EventIcon kind="corrupted" className="text-q-red" />}>Corrupted map</Row>
                 <Row mark={<EventIcon kind="heroic" className="text-q-unique" />}>Heroic map (Standard of Heroes)</Row>
                 <Row mark={<EventIcon kind="catalyzed" className="text-q-magic" />}>Catalyzed map (Catalyst Shard: a random event)</Row>
+                <Row mark={<EventIcon kind="treacherous" className="text-q-crafted" />}>Treacherous map (player ear)</Row>
                 <Row mark={<EventIcon kind="map_glob_skirmish_mode" className="text-q-gray" />}>Fortified map</Row>
                 <Row mark={<span className="flex items-center gap-1 font-num text-q-set"><EventIcon kind="boss" className="text-q-set" />4:40</span>}>
                   Map boss killed, at this time inside the map
                 </Row>
-                <Row mark={<span className="flex items-center gap-1 text-muted"><EventIcon kind="boss" className="text-muted" /><span className="text-xs">skipped</span></span>}>
+                <Row mark={<span className="flex items-center gap-1 text-muted"><EventIcon kind="boss" className="opacity-50 grayscale" /><span className="text-xs">skipped</span></span>}>
                   The boss didn't die in this run
                 </Row>
                 <Row mark={<span className="font-num font-semibold text-q-set">−0:16</span>}>Ahead of your best clear (red: behind)</Row>

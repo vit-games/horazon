@@ -497,7 +497,7 @@ export function DropList({
                   </button>
                 )}
               </li>
-              {selling === d.id && <SellForm dropId={d.id} onDone={() => setSelling(null)} />}
+              {selling === d.id && <SellForm dropId={d.id} item={d.item} onDone={() => setSelling(null)} />}
               </Fragment>
               );
             })}

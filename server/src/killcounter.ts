@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { bossEntries, liveBossState, liveRunState, type RunProgress } from './capture.js';
 import { pool } from './db.js';
-import { baseInfo } from './gamedata.js';
+import { baseInfo, uniqueMapName } from './gamedata.js';
 import { killRate, perMinute, type Curve } from './killrate.js';
 import { CLEAR, population, tierOf } from './population.js';
 
@@ -212,8 +212,9 @@ export async function killCounter() {
       id: run.id,
       kind: run.kind,
       area: run.area,
-      name: run.kind === 'horazon' ? "Horazon's map" : (est.mapCode && baseInfo(est.mapCode)?.name) || `Map ${run.area}`,
-      tier: tierOf(est.mapCode),
+      name: run.kind === 'horazon' ? "Horazon's map" : (est.mapCode && (uniqueMapName(est.mapCode) ?? baseInfo(est.mapCode)?.name)) || `Map ${run.area}`,
+      // Unique maps show without a tier, as everywhere else in the app.
+      tier: est.mapCode && uniqueMapName(est.mapCode) ? null : tierOf(est.mapCode),
       quality: run.mapQuality,
       stats: run.mapStats,
     },
