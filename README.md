@@ -3,7 +3,11 @@
 > [!WARNING]
 > **Use Horazon at your own risk.** The Project Diablo 2 team has not confirmed that it is safe or allowed to use.
 > PD2's rules forbid third-party software that interacts with the game, so using it may put your account at risk.
-> Horazon is not affiliated with Project Diablo 2 or Blizzard. See [What Horazon does and doesn't do](#what-horazon-does-and-doesnt-do).
+> Horazon is not affiliated with Project Diablo 2 or Blizzard.
+> **It isn't detectable at this moment.** Since Horazon never touches the game process, its files or the PD2 servers,
+  the game has nothing to detect it by, as far as I know today. That can change with any PD2 update, so it is not a
+  promise that using it is safe or allowed (see the warning above).
+> See [What Horazon does and doesn't do](#what-horazon-does-and-doesnt-do).
 
 [![Downloads](https://img.shields.io/github/downloads/vit-games/horazon/total?style=for-the-badge&color=c9a45c)](https://github.com/vit-games/horazon/releases)
 [![Latest release](https://img.shields.io/github/v/release/vit-games/horazon?include_prereleases&style=for-the-badge&color=c9a45c)](https://github.com/vit-games/horazon/releases/latest)
