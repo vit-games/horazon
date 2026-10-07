@@ -6,7 +6,7 @@
 > Horazon is not affiliated with Project Diablo 2 or Blizzard.
 > **It isn't detectable at this moment.** Since Horazon never touches the game process, its files or the PD2 servers,
   the game has nothing to detect it by, as far as I know today. That can change with any PD2 update, so it is not a
-  promise that using it is safe or allowed (see the warning above).
+  promise that using it is safe or allowed.
 > See [What Horazon does and doesn't do](#what-horazon-does-and-doesnt-do).
 
 [![Downloads](https://img.shields.io/github/downloads/vit-games/horazon/total?style=for-the-badge&color=c9a45c)](https://github.com/vit-games/horazon/releases)
