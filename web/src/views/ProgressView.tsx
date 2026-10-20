@@ -184,7 +184,14 @@ export function ProgressView({ range, section, title }: { range: Range; section:
   const current = stats?.character ?? null;
   // A season's progress is the ladder characters': "All" leaves non-ladder ones out (picking one still shows it).
   const seasonal = since !== null;
-  const nonLadder = useMemo(() => new Set((stats?.characters ?? []).filter((c) => c.ladder === false).map((c) => c.name)), [stats]);
+  // Ladder status as of the range's end (as the server's nonLadderCharacters): the latest flagged game
+  // before it, so last season's characters, moved to non-ladder since, still count for their season.
+  const nonLadder = useMemo(() => {
+    const end = range.until?.getTime() ?? Infinity;
+    const latest = new Map<string, boolean>();
+    for (const g of games) if (g.character && g.ladder !== null && Date.parse(g.started_at) < end) latest.set(g.character, g.ladder);
+    return new Set([...latest].filter(([, ladder]) => !ladder).map(([name]) => name));
+  }, [games, range.until]);
   /** Whether a game, run or drop of this character is shown: the picked one, or any counted with "All". */
   const mine = (c: string | null) => (allChars ? !(seasonal && c !== null && nonLadder.has(c)) : c === current);
   const myGames = useMemo(() => games.filter((g) => mine(g.character)), [games, current, allChars, seasonal, nonLadder]);
@@ -632,7 +639,7 @@ function SessionList({
               .sort((a, b) => rankScore(b, new Set(), tierOf(b.item, values)) - rankScore(a, new Set(), tierOf(a.item, values)))[0];
             const tierMix = new Map<string, number>();
             for (const r of maps) {
-              const tier = mapInfo(r.map_code).tier ?? 'Unique';
+              const tier = mapInfo(r.map_code, r.map_tier).tier ?? 'Unique';
               tierMix.set(tier, (tierMix.get(tier) ?? 0) + 1);
             }
             const ref = day ?? midnight(x.start);

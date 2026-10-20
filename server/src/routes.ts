@@ -18,7 +18,7 @@ import {
 import { seedSampleSeason } from './seed/season.js';
 import { deleteSampleData } from './seed/seed.js';
 import { getSeasons } from './seasons.js';
-import { NON_LADDER_CHARACTERS } from './ladder.js';
+import { nonLadderCharacters } from './ladder.js';
 import { getSettings, parseTierConfig, updateSettings, type Settings } from './settings.js';
 import { getValues } from './values.js';
 
@@ -42,7 +42,7 @@ async function queryDrops({ since, until }: RangeQuery, includeIgnored: boolean)
         AND ($2::timestamptz IS NULL OR found_at < $2)
         AND ($3 OR NOT ignored)
         -- A season's drops are the ladder characters'.
-        AND ($1::timestamptz IS NULL OR character IS NULL OR character NOT IN ${NON_LADDER_CHARACTERS})
+        AND ($1::timestamptz IS NULL OR character IS NULL OR character NOT IN ${nonLadderCharacters('$2')})
       ORDER BY found_at DESC
       LIMIT 20000`,
     [since ?? null, until ?? null, includeIgnored],
@@ -173,7 +173,7 @@ export function registerRoutes(app: FastifyInstance) {
          FROM (SELECT quality, name, found_at, false AS baseline, id AS drop_id, COALESCE(original_item, item) AS item FROM drops
                 WHERE quality IN ('Unique', 'Set') AND source = 'capture' AND (NOT ignored OR discarded)
                   -- A season's grail is the ladder characters'.
-                  AND ($1::timestamptz IS NULL OR character IS NULL OR character NOT IN ${NON_LADDER_CHARACTERS})
+                  AND ($1::timestamptz IS NULL OR character IS NULL OR character NOT IN ${nonLadderCharacters('$2')})
                UNION ALL
                SELECT quality, name, marked_at, true, NULL, NULL FROM grail_marks) f
         WHERE ($1::timestamptz IS NULL OR found_at >= $1) AND ($2::timestamptz IS NULL OR found_at < $2)

@@ -170,7 +170,7 @@ S2C = {
     0x7a: 13, 0x7b: 8, 0x7c: 6, 0x7d: 18, 0x7e: 5, 0x7f: 10, 0x81: 20, 0x82: 29, 0x83: 16, 0x84: 4, 0x89: 2,
     0x8a: 6, 0x8b: 6, 0x8c: 11, 0x8d: 7, 0x8e: 10, 0x8f: 33, 0x90: 13, 0x91: 26, 0x92: 6, 0x93: 8, 0x95: 13,
     0x96: 9, 0x97: 1, 0x98: 7, 0x99: 16, 0x9a: 17, 0x9b: 7, 0x9e: 7, 0x9f: 8, 0xa0: 10, 0xa1: 7, 0xa2: 8, 0xa3: 24,
-    0xa4: 3, 0xa5: 8, 0xa6: 1, 0xa7: 7, 0xa9: 7, 0xab: 7, 0xad: 9, 0xb0: 1, 0xb1: 53, 0xb2: 1, 0xb3: 5, 0xb4: 1,
+    0xa4: 3, 0xa5: 8, 0xa6: 1, 0xa7: 7, 0xa9: 7, 0xab: 7, 0xad: 6, 0xb0: 1, 0xb1: 53, 0xb2: 1, 0xb3: 5, 0xb4: 1,
     0xff: 1,
 }
 
@@ -379,7 +379,8 @@ class Game:
         self.uber_died = {}     # unit -> area it died in
         self.ubers_killed = set()
         self.bosses_killed = set()
-        self.kills_sent = (None, 0, 0.0)
+        self.kills_sent = (None, 0, None, 0.0)  # kills, deaths, monsters left, when
+        self.monsters_left = None  # the map's monster counter (0xAD), None while the game hides it
         self.xp = None          # own experience: absolute on join (0x1C), then gains (0x1A/0x1B)
         self.xp_owed = 0        # lost to a death and not yet won back by picking up the corpse
         self.xp_lost = 0        # this game's death losses, net of what the corpse gave back
@@ -449,8 +450,12 @@ class Game:
             self.kills = struct.unpack_from('<H', p, 5)[0]
         elif pid == 0x65 and struct.unpack_from('<I', p, 1)[0] == (self.self_id or 1) and struct.unpack_from('<H', p, 5)[0] != 0xFFFF:
             self.kills = struct.unpack_from('<H', p, 5)[0]
-            if ts - self.kills_sent[2] >= KILLS_EVERY:
+            if ts - self.kills_sent[3] >= KILLS_EVERY:
                 self.flush_kills(ts)
+        elif pid == 0xad:
+            # PD2's "monsters left" counter: shown flag, then u32 - of the monsters spawned so far, so
+            # deaths + left grows while the map is explored and settles once it all has been.
+            self.monsters_left = struct.unpack_from('<I', p, 2)[0] if p[1] else None
         elif pid == 0xac:
             unit, cls = struct.unpack_from('<IH', p, 1)
             if cls not in NEVER_COUNT:
@@ -504,7 +509,7 @@ class Game:
                     self.bosses_killed.add(name)
                     self.flush_kills(ts)
                     self.event(ts, 'boss', name=name, state='killed', area=self.area)
-                if ts - self.kills_sent[2] >= KILLS_EVERY:
+                if ts - self.kills_sent[3] >= KILLS_EVERY:
                     self.flush_kills(ts)
         elif pid == 0x5a and p[1] == 0x06 and len(p) >= 24:
             # "<name> was slain by ...": sent for every player in the game. Unknown name
@@ -554,7 +559,7 @@ class Game:
 
     def tick(self, ts):
         """Send kills that arrived within KILLS_EVERY of the last update once it has passed."""
-        if self.started and ts - self.kills_sent[2] >= KILLS_EVERY:
+        if self.started and ts - self.kills_sent[3] >= KILLS_EVERY:
             self.flush_kills(ts)
         if self.started:
             self.report_uber_live(ts)
@@ -574,10 +579,10 @@ class Game:
             self.event(ts, 'uber_live', name=self.uber_active, bosses=bosses)
 
     def flush_kills(self, ts):
-        if (self.kills, len(self.died)) != self.kills_sent[:2]:
-            # count: the game's kill counter for the player; deaths: monsters seen dying
-            self.event(ts, 'kills', count=self.kills, deaths=len(self.died))
-            self.kills_sent = (self.kills, len(self.died), ts)
+        if (self.kills, len(self.died), self.monsters_left) != self.kills_sent[:3]:
+            # count: the game's kill counter for the player; deaths: monsters seen dying; left: the map's counter
+            self.event(ts, 'kills', count=self.kills, deaths=len(self.died), left=self.monsters_left)
+            self.kills_sent = (self.kills, len(self.died), self.monsters_left, ts)
         self.flush_xp(ts)
 
     def gain_xp(self, n):

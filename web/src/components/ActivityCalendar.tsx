@@ -363,7 +363,7 @@ function Cloud({ bucket, title, anchor }: { bucket: Bucket; title: string; ancho
   const time = bucket.runs.reduce((n, r) => n + r.seconds, 0);
   const byMap = new Map<string, number>();
   for (const r of maps) {
-    const m = mapInfo(r.map_code);
+    const m = mapInfo(r.map_code, r.map_tier);
     const key = `${m.tier ? `${m.tier} ` : ''}${r.map_name && r.map_quality === 'unique' ? r.map_name : m.name}`;
     byMap.set(key, (byMap.get(key) ?? 0) + 1);
   }

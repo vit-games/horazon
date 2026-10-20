@@ -3,7 +3,7 @@ import { createBackup } from './backup.js';
 import { saveCharacterInfo } from './characters.js';
 import { pool } from './db.js';
 import { killRate, type Curve } from './killrate.js';
-import { population, populationRuns } from './population.js';
+import { population, populationRuns, tierOf } from './population.js';
 import { notify, onDataReplaced } from './events.js';
 import { areasNamed, baseInfo, isKeptDrop, setOrUniqueName } from './gamedata.js';
 import { modKey, STACK_NAMES, stackCodeOf, stackItem } from './ingest.js';
@@ -56,7 +56,7 @@ type CaptureEvent = { game: string; ts: number } & (
   | { type: 'map_event'; event: string; invader?: string }
   | { type: 'game_end' }
   | { type: 'area'; area: number }
-  | { type: 'kills'; count: number | null; deaths?: number }
+  | { type: 'kills'; count: number | null; deaths?: number; left?: number | null }
   | { type: 'notice'; text: string }
   | { type: 'portal'; area: number; unit: number }
   | { type: 'boss'; name: string; state: 'seen' | 'killed'; area: number | null }
@@ -135,8 +135,11 @@ interface ActiveEvent {
   dirty: boolean;
 }
 
-/** Town areas: Rogue Encampment, Lut Gholein, Kurast Docks, Pandemonium Fortress, Harrogath. */
-const TOWNS = new Set([1, 40, 75, 103, 109]);
+/**
+ * Town areas: Rogue Encampment, Lut Gholein, Kurast Docks, Pandemonium Fortress, Harrogath; and the areas that
+ * aren't runs either: the PvP arenas (157, 159, 166) and the Guild Hall at each guild level (202-206, Season 14).
+ */
+const TOWNS = new Set([1, 40, 75, 103, 109, 157, 159, 166, 202, 203, 204, 205, 206]);
 /** Diablo II's last area (levels.txt); PD2 map areas come after it. */
 const LAST_D2_AREA = 136;
 /**
@@ -232,11 +235,6 @@ export interface RunProgress {
 /** Seconds between curve samples (a sample is only taken when deaths changed). */
 const SAMPLE_EVERY = 2;
 
-/**
- * How many monsters are left on the map. A guess at the wording: the game doesn't show
- * this yet (planned for the next season) - adjust once a real message is captured.
- */
-const MONSTERS_LEFT = /(\d+)\s+(?:monsters?|enemies)\s+(?:remain|left)|(?:monsters?|enemies)\s+(?:remaining|left)\s*:?\s*(\d+)/i;
 
 const games = new Map<string, GameState>();
 let lastEventAt: Date | null = null;
@@ -358,6 +356,9 @@ async function closeVisit(g: GameState, at: Date) {
   g.visit = null;
 }
 
+/** A map item's tier from the PD2 API (base type "Map T3" -> 'T3'). */
+const apiTier = (item: ApiItem | undefined) => /^Map (T\d)$/.exec(item?.base?.type ?? '')?.[1] ?? null;
+
 async function createRun(g: GameState, kind: 'map' | 'horazon' | 'zone', area: number, at: Date, map: GameState['pendingMap']) {
   const candidates = map?.candidates ?? [];
   if (kind === 'map' && !map?.code) {
@@ -371,13 +372,16 @@ async function createRun(g: GameState, kind: 'map' | 'horazon' | 'zone', area: n
     if (rows[0]) map = { ...map, candidates, code: rows[0].map_code };
   }
   const { rows } = await pool.query<{ id: string }>(
-    `INSERT INTO map_runs (game_id, parent_id, kind, map_code, map_quality, map_ilvl, map_uid, area, started_at, map_candidates, map_item, boss_tracked, map_stats)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $3 <> 'zone', $12) RETURNING id`,
+    `INSERT INTO map_runs (game_id, parent_id, kind, map_code, map_quality, map_ilvl, map_uid, area, started_at, map_candidates, map_item, boss_tracked, map_stats, map_tier)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $3 <> 'zone', $12, $13) RETURNING id`,
     [
       g.id, kind === 'horazon' ? g.mainRun : null, kind, map?.code ?? null, map?.quality ?? null, map?.ilvl ?? null, map?.uid ?? null, area, at,
       candidates.length > 1 ? JSON.stringify(candidates) : null,
       candidates.length === 1 ? candidates[0] : null,
       kind === 'map' && map?.mods ? JSON.stringify(map.mods) : null,
+      // The tier as of now (a later season may move the map, 004_map_tier.sql): the API's, which is the
+      // live server's even before this build's game data knows the season, else the game data's.
+      apiTier(candidates[0]) ?? (map?.code && tierOf(map.code) ? `T${tierOf(map.code)}` : null),
     ],
   );
   const id = Number(rows[0].id);
@@ -456,7 +460,7 @@ export async function resolveMapRuns() {
     const gone = run.map_candidates.filter((c) => !present.has(String(c.id)) && !taken.has(String(c.id)));
     if (gone.length !== 1) continue;
     taken.add(String(gone[0].id));
-    await pool.query('UPDATE map_runs SET map_item = $2, map_candidates = NULL WHERE id = $1', [run.id, gone[0]]);
+    await pool.query('UPDATE map_runs SET map_item = $2, map_candidates = NULL, map_tier = COALESCE($3, map_tier) WHERE id = $1', [run.id, gone[0], apiTier(gone[0])]);
     changed = true;
   }
   if (changed) notify('runs');
@@ -512,13 +516,6 @@ async function onNotice(g: GameState, text: string, at: Date) {
   const region = /^(\S+)\s+\d+h \d+m remaining$/.exec(text.trim())?.[1];
   if (region) {
     await pool.query('UPDATE games SET region = $2 WHERE id = $1', [g.id, region]);
-    return;
-  }
-  const left = MONSTERS_LEFT.exec(text);
-  const p = g.visit?.runId != null ? g.progress.get(g.visit.runId) : undefined;
-  if (left && p) {
-    p.exactTotal = runTotals(g, p, at.getTime()).deaths + Number(left[1] ?? left[2]);
-    p.dirty = true;
     return;
   }
   const corruption = CORRUPTION_NOTICE.exec(text.trim());
@@ -857,6 +854,14 @@ async function apply(ev: CaptureEvent) {
       if (typeof ev.deaths === 'number') g.deaths = ev.deaths;
       if (g.visit) g.visit.dirty = true;
       sampleProgress(g, at.getTime());
+      // The map's own counter counts what has spawned so far: the total grows while the map is explored.
+      if (typeof ev.left === 'number') {
+        const p = g.visit?.runId != null ? g.progress.get(g.visit.runId) : undefined;
+        if (p) {
+          p.exactTotal = runTotals(g, p, at.getTime()).deaths + ev.left;
+          p.dirty = true;
+        }
+      }
       break;
     case 'map_used':
       // Only one map opens per game; the last one used before entering is the one.
@@ -1053,7 +1058,7 @@ type RangeQuery = { since?: string; until?: string };
 
 export async function queryRuns({ since, until }: RangeQuery) {
   const { rows: runs } = await pool.query(
-    `SELECT r.id::int, r.game_id, r.parent_id::int, r.kind, r.map_code, r.map_quality, r.map_ilvl, r.map_uid, r.area,
+    `SELECT r.id::int, r.game_id, r.parent_id::int, r.kind, r.map_code, r.map_tier, r.map_quality, r.map_ilvl, r.map_uid, r.area,
             r.map_item->>'name' AS map_name, r.map_stats, r.corrupted, r.boss, r.boss_seconds, r.boss_tracked, r.progress,
             r.boss_tier, r.summoned_at, r.boss_hp, r.boss_detail,
             (SELECT COALESCE(jsonb_agg(m->>'label' ORDER BY (m->>'priority')::int DESC), '[]') FROM jsonb_array_elements(r.map_item->'modifiers') m) AS map_mods,

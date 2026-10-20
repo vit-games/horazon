@@ -11,10 +11,14 @@ export interface Season {
 
 const toIso = (s: string) => new Date(s.replace(' ', 'T').replace(/(\.\d{3})\d*$/, '$1') + 'Z').toISOString();
 
-/** Seasons from season 10 onward (older ones predate any tracked data), refreshed daily. */
+/**
+ * Seasons from season 10 onward (older ones predate any tracked data), refreshed hourly: until a
+ * new season shows up here the old one has no end, and its ladder characters, moved to non-ladder
+ * at the reset, drop out of it (ladder.ts) - so the new one must show up soon after the reset.
+ */
 export async function getSeasons(): Promise<Season[]> {
   const cached = await getCache<Season[]>('seasons');
-  if (cached && Date.now() - cached.updated_at.getTime() < 24 * 3600e3) return cached.value;
+  if (cached && Date.now() - cached.updated_at.getTime() < 3600e3) return cached.value;
 
   const found: { number: number; name: string; start: string }[] = [];
   for (let n = 10, misses = 0; misses < 2 && n < 60; n++) {

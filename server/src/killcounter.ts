@@ -201,7 +201,13 @@ export async function killCounter() {
   const { run, state, at, totals } = live;
   const est = await estimateFor(run);
   const { seconds, deaths } = totals;
-  const total = run.exactTotal ?? (est.total !== null ? Math.max(est.total, deaths) : null);
+  // The game counts the monsters spawned so far, so its total grows while the map is explored: an
+  // estimate above it wins until the game's catches up, or the map is cleared (none left).
+  // ponytail: a map smaller than its estimate reads under 100% until cleared; a "fully spawned" signal would fix it.
+  const left = run.exactTotal !== null ? Math.max(0, run.exactTotal - deaths) : null;
+  const estimated = est.total !== null ? Math.max(est.total, deaths) : null;
+  const exact = run.exactTotal !== null && (left === 0 || estimated === null || run.exactTotal >= estimated);
+  const total = exact ? run.exactTotal : estimated;
   const curve: Curve = [...run.curve, [seconds, deaths]];
   const before = [...curve].reverse().find(([t]) => t <= seconds - PULL_SECONDS);
 
@@ -221,7 +227,9 @@ export async function killCounter() {
     seconds,
     deaths,
     total,
-    totalSource: run.exactTotal !== null ? ('game' as const) : est.source,
+    totalSource: exact ? ('game' as const) : est.source,
+    /** Monsters left by the game's own counter (of those spawned so far); null before it reports. */
+    left,
     historyRuns: est.runs,
     pull: deaths - (before?.[1] ?? 0),
     /** Kills per minute: the run's average and bars over time, the last PULL_SECONDS, and the best run's average. */

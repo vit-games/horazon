@@ -63,12 +63,12 @@ export function runMapLabel(r: MapRun, parent?: MapRun): { name: string; tier: s
     const p = parent ? mapInfo(parent.map_code) : null;
     return { name: `Horazon's portal${p ? ` · from ${p.name}` : ''}`, tier: null, color: 'text-text' };
   }
-  if (runTier(r.map_code, r.map_quality) === 'Unique') {
+  if (runTier(r) === 'Unique') {
     // Each unique map has its own base, so the base names it.
     const name = MAP_CATALOG.find((m) => m.tier === 'Unique' && m.code === r.map_code)?.name ?? r.map_name ?? mapInfo(r.map_code).name;
     return { name, tier: 'Unique', color: QUALITY_COLOR.unique };
   }
-  return { ...mapInfo(r.map_code), color: QUALITY_COLOR[r.map_quality ?? ''] ?? 'text-text' };
+  return { ...mapInfo(r.map_code, r.map_tier), color: QUALITY_COLOR[r.map_quality ?? ''] ?? 'text-text' };
 }
 
 type View = 'maps' | 'log';
@@ -535,14 +535,22 @@ function MapList({ runs, children, characters }: { runs: MapRun[]; children: Map
   const values = useValues();
   const grail = useRunGrail(runs, children);
   const tiers = useMemo(() => {
+    // Runs go under the tier their base had when run (a map a season moved shows under both); unique maps' bases are T5.
+    const rowTier = (r: MapRun) => {
+      const t = mapInfo(r.map_code, r.map_tier).tier;
+      return t === 'T5' ? 'Unique' : t;
+    };
     const byCode = new Map<string, MapRun[]>();
-    for (const r of runs) if (r.map_code) byCode.set(r.map_code, [...(byCode.get(r.map_code) ?? []), r]);
+    for (const r of runs) if (r.map_code) byCode.set(`${rowTier(r)}:${r.map_code}`, [...(byCode.get(`${rowTier(r)}:${r.map_code}`) ?? []), r]);
     return MAP_TIERS.map((tier) => {
-      const all = MAP_CATALOG.filter((m) => m.tier === tier).map((m) => {
-        const rs = (byCode.get(m.code) ?? []).sort((a, b) => b.started_at.localeCompare(a.started_at));
-        return { ...m, runs: rs, stats: statsOf(rs, values), trend: trendOf(rs) };
+      const moved = [...byCode.keys()].filter((k) => k.startsWith(`${tier}:`)).map((k) => k.slice(tier.length + 1));
+      const catalog = MAP_CATALOG.filter((m) => m.tier === tier);
+      const codes = [...catalog.map((m) => m.code), ...moved.filter((c) => !catalog.some((m) => m.code === c))];
+      const all = codes.map((code) => {
+        const rs = (byCode.get(`${tier}:${code}`) ?? []).sort((a, b) => b.started_at.localeCompare(a.started_at));
+        return { code, name: MAP_CATALOG.find((m) => m.code === code)?.name ?? mapInfo(code).name, tier, runs: rs, stats: statsOf(rs, values), trend: trendOf(rs) };
       });
-      const tierRuns = runs.filter((r) => runTier(r.map_code, r.map_quality) === tier);
+      const tierRuns = runs.filter((r) => runTier(r) === tier);
       return {
         tier,
         maps: all.filter((m) => m.stats.runs),
@@ -726,13 +734,13 @@ function CharacterTable({ runs, characters }: { runs: MapRun[]; characters: Char
       maps.set(r.map_code, m);
     }
     return {
-      tiers: MAP_TIERS.filter((t) => runs.some((r) => runTier(r.map_code, r.map_quality) === t)),
+      tiers: MAP_TIERS.filter((t) => runs.some((r) => runTier(r) === t)),
       // Maps more than one character ran: the ones worth comparing on.
       maps: [...maps].filter(([, m]) => m.chars.size > 1).sort(([, a], [, b]) => (a.tier ?? '').localeCompare(b.tier ?? '') || a.name.localeCompare(b.name)),
     };
   }, [runs]);
   const inScope = useMemo(() => {
-    if (scope.startsWith('tier:')) return runs.filter((r) => runTier(r.map_code, r.map_quality) === scope.slice(5));
+    if (scope.startsWith('tier:')) return runs.filter((r) => runTier(r) === scope.slice(5));
     if (scope.startsWith('map:')) return runs.filter((r) => r.map_code === scope.slice(4));
     return runs;
   }, [runs, scope]);
@@ -926,7 +934,7 @@ function RunList({
       maps: [...maps].sort(([, a], [, b]) => (a.tier ?? '').localeCompare(b.tier ?? '') || a.name.localeCompare(b.name)),
       events: EVENTS.filter((e) => runs.some((r) => r.events.some((x) => x.kind === e.kind))),
       content: Object.keys(CONTENT_LABEL).filter((c) => runs.some((r) => r.map_stats?.some((m) => m.stat === c))),
-      tiers: MAP_TIERS.filter((t) => runs.some((r) => runTier(r.map_code, r.map_quality) === t)),
+      tiers: MAP_TIERS.filter((t) => runs.some((r) => runTier(r) === t)),
       corrupted: runs.some((r) => r.map_stats?.some((m) => m.stat === 'corrupted')),
     };
   }, [runs]);
@@ -948,7 +956,7 @@ function RunList({
         {filter.sort === key && <span aria-label={desc ? ' highest first' : ' lowest first'}>{desc ? ' ↓' : ' ↑'}</span>}
       </button>
     );
-  const tierCount = (t: string) => runs.filter((r) => runTier(r.map_code, r.map_quality) === t).length;
+  const tierCount = (t: string) => runs.filter((r) => runTier(r) === t).length;
 
   return (
     <section className="flex flex-col gap-3">

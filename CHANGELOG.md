@@ -7,6 +7,32 @@ date and download links), and `scripts/release.sh` refuses a version without one
 Versions follow the PD2 seasons: major for a new season (with its feature upgrades), minor for
 each new feature, patch for fixes (see the README's Releasing section).
 
+## v1.0.0
+
+Horazon 1.0, adjusted for Season 14 (Alliance).
+
+#### NEW
+
+- **Ready for Alliance** - when the season resets, your Betrayal characters move to non-ladder and keep their
+  Betrayal drops, grail and runs in Betrayal; what they find afterwards stays out of Alliance (it still counts for
+  all time). Alliance shows up in the season select within an hour of PD2 announcing it.
+- **Maps keep the tier they were run at** - a season that moves maps between tiers doesn't rewrite your earlier
+  runs: each run stays under the tier its map had when you ran it, and a moved map shows under both tiers.
+- **Season 14 maps** - Poisoned Well (T1), Dark Temple and Descent (T2) are known by name and tier, and Sanatorium
+  is T1 now (your earlier Sanatorium runs stay T2).
+- **The kill counter reads the game's monster counter** - the live tracker shows how many monsters the game says are
+  left on the map ("67 left"), and the map's total comes from the game too. The game only counts monsters spawned so
+  far, so while you uncover the map the estimate from your earlier runs is used until the game's count catches up
+  (shown as "~" and "est."), and runs are saved with the game's figure.
+
+#### FIXES
+
+- **Nothing lost to the new counter** - since PD2 added its monster counter, the capture misread it and skipped what
+  followed it in the game's data: some drops and area changes were missed, and stray readings could mark a game as
+  ladder or non-ladder at random. Games from before the update aren't affected.
+- **The Guild Hall is a town** - at every guild level, as are the PvP and Battle Royale arenas: time there no longer
+  shows as a zone run on the kill counter or under Zones, and the runs they already made are removed.
+
 ## v0.15.0
 
 #### NEW

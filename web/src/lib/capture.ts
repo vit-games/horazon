@@ -78,6 +78,8 @@ export interface MapRun {
   /** Zone runs: corrupted zone (null until it can be detected). */
   corrupted: boolean | null;
   map_code: string | null;
+  /** The map's tier when it was run ('T1'-'T5'): a season may move maps between tiers. Null: use the current one. */
+  map_tier?: string | null;
   map_quality: string | null;
   map_ilvl: number | null;
   map_uid: number | null;
@@ -227,8 +229,12 @@ export const EVENTS: { kind: string; label: string; message: string; reward: str
 export const EVENT_LABEL: Record<string, string> = Object.fromEntries(EVENTS.map((e) => [e.kind, e.label]));
 
 // Diablo II 1.13 levels.txt names by id (1-136); PD2 map zones (above that) are named by their map.
-const AREAS: string[] = areaNames;
-const TOWNS = new Set([1, 40, 75, 103, 109]);
+const AREAS: string[] = Object.assign([...areaNames], {
+  157: 'PvP Arena', 159: 'PvP Arena', 166: 'Battle Royale Arena',
+  202: 'Guild Hall', 203: 'Guild Hall', 204: 'Guild Hall', 205: 'Guild Hall', 206: 'Guild Hall',
+});
+// The act towns, and areas that aren't runs either: the PvP arenas and the Guild Hall at each guild level (Season 14).
+const TOWNS = new Set([1, 40, 75, 103, 109, 157, 159, 166, 202, 203, 204, 205, 206]);
 export const townName = (area: number | null) => (area !== null && TOWNS.has(area) ? AREAS[area] : null);
 export const areaName = (area: number | null) => (area === null ? 'Unknown' : AREAS[area] || `Area ${area}`);
 
@@ -250,11 +256,14 @@ const setOnBase = onlyOnBase(gameData.sets as Record<string, Named>);
 
 export const baseName = (code: string) => bases[code]?.name ?? code;
 
-/** Base type "Map T3" + name "Arreat Battlefield Map" -> { name: 'Arreat Battlefield', tier: 'T3' }. */
-export function mapInfo(code: string | null): { name: string; tier: string | null } {
+/**
+ * Base type "Map T3" + name "Arreat Battlefield Map" -> { name: 'Arreat Battlefield', tier: 'T3' }.
+ * `runTier`: a run's stored tier (MapRun.map_tier), which wins over the current one.
+ */
+export function mapInfo(code: string | null, runTier?: string | null): { name: string; tier: string | null } {
   if (!code) return { name: 'Unknown map', tier: null };
   const base = bases[code];
-  const tier = /\bT\d\b/.exec(base?.type ?? '')?.[0] ?? (base?.type === 'Uber' ? 'Uber' : null);
+  const tier = runTier ?? /\bT\d\b/.exec(base?.type ?? '')?.[0] ?? (base?.type === 'Uber' ? 'Uber' : null);
   const name = (base?.name ?? code).replace(/ Map$/, '');
   return { name: name === 'Map' || !name ? `${tier ?? ''} map`.trim() : name, tier };
 }
@@ -279,11 +288,12 @@ export const MAP_CATALOG: { code: string; name: string; tier: MapTier }[] = [
   ...[...UNIQUE_MAPS].map(([code, name]) => ({ code, name, tier: 'Unique' as MapTier })),
 ].sort((a, b) => a.name.localeCompare(b.name));
 
-/** Tier of a map run: unique maps are a tier of their own. */
-export function runTier(code: string | null, quality: string | null): MapTier | null {
-  if (!code) return null;
-  if (UNIQUE_MAPS.has(code) || quality === 'unique') return 'Unique';
-  return (/^Map (T[1-4])$/.exec(bases[code]?.type ?? '')?.[1] as MapTier | undefined) ?? null;
+/** Tier of a map run, as when it was run: unique maps are a tier of their own. */
+export function runTier(r: Pick<MapRun, 'map_code' | 'map_quality' | 'map_tier'>): MapTier | null {
+  if (!r.map_code) return null;
+  if (UNIQUE_MAPS.has(r.map_code) || r.map_quality === 'unique') return 'Unique';
+  const tier = r.map_tier ?? /^Map (T\d)$/.exec(bases[r.map_code]?.type ?? '')?.[1];
+  return MAP_TIERS.includes(tier as MapTier) ? (tier as MapTier) : null;
 }
 
 /**

@@ -65,6 +65,8 @@ export type KillCounterData =
       deaths: number;
       total: number | null;
       totalSource: 'game' | 'map' | 'tier' | null;
+      /** Monsters left by the game's own counter (of those spawned so far); null before it reports. */
+      left: number | null;
       historyRuns: number;
       pull: number;
       /** Kills per minute: run average and bars, the last 15 s, the best run's average. */
@@ -93,6 +95,7 @@ const SAMPLE: KillCounterData = {
   deaths: 1224,
   total: 2264,
   totalSource: 'map',
+  left: null,
   historyRuns: 5,
   pull: 132,
   rate: {
@@ -404,7 +407,10 @@ function Pilot({ data, clock }: { data: Running; clock: number }) {
       {/* Forces */}
       <ForcesLine data={data} height="h-2.5" />
       <div className="flex items-baseline justify-between gap-3 tabular-nums">
-        <span className="text-[13px] text-muted">{data.total !== null ? `${data.total.toLocaleString()} monsters, ${sourceLabel}` : sourceLabel}</span>
+        <span className="text-[13px] text-muted">
+          {data.left !== null && <span className="font-semibold text-text">{data.left.toLocaleString()} left · </span>}
+          {data.total !== null ? `${data.total.toLocaleString()} monsters, ${sourceLabel}` : sourceLabel}
+        </span>
         <span className="font-semibold">
           {pct !== null && data.pull > 0 && data.state === 'running' && <span className="text-muted">+{((data.pull / data.total!) * 100).toFixed(1)}% </span>}
           <span className="text-lg">{pct !== null ? `${(pct * 100).toFixed(1)}%` : data.deaths.toLocaleString()}</span>

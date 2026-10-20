@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://vit-games.github.io/horazon/sitemap.xml

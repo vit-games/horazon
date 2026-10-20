@@ -63,7 +63,7 @@ function value(r: MapRun, sort: RunSort, v: ValuesData): number | null {
 }
 
 export function matches(r: MapRun, f: RunFilter): boolean {
-  const tier = runTier(r.map_code, r.map_quality);
+  const tier = runTier(r);
   if (f.tiers.length && (!tier || !f.tiers.includes(tier))) return false;
   if (f.map && r.map_code !== f.map) return false;
   const ev = events(r);
